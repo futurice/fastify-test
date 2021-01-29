@@ -20,6 +20,8 @@
   "dependencies": {
     "@sinclair/typebox": "^0.12.7",
     "fastify": "^3.11.0",
+    "fastify-plugin": "^3.0.0",
+    "fastify-swagger": "^4.0.1",
     "ts-node": "^9.1.1"
   }
 }

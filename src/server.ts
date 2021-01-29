@@ -1,11 +1,19 @@
 import fastify from 'fastify'
+import fastifyPlugin from 'fastify-plugin'
 import config from './config';
 import routes from './routes';
+import { docs } from './docs';
 
 
 async function initApp() {
   const app = fastify({ logger: true });
+  app.register(fastifyPlugin(docs));
   app.register(routes, {prefix: '/api'});
+
+  app.ready(err => {
+    if (err) throw err
+    app.swagger();
+  });
   return app;
 }
 
