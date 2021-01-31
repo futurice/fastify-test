@@ -8,6 +8,7 @@ export const requestBodySchema = Type.Object({
 export const  responseBodySchema = Type.Object({
   ok: Type.Boolean(),
   number: Type.Number(),
+  message: Type.String(),
 });
 
 export const queryStringSchema = Type.Object({

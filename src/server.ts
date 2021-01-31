@@ -1,14 +1,18 @@
+import path from 'path'
 import fastify from 'fastify'
 import fastifyPlugin from 'fastify-plugin'
 import config from './config';
-import routes from './routes';
+import autoload from 'fastify-autoload'
 import { docs } from './docs';
 
 
 async function initApp() {
   const app = fastify({ logger: true });
   app.register(fastifyPlugin(docs));
-  app.register(routes, {prefix: '/api'});
+  app.register(autoload, {
+    dir: path.join(__dirname, 'routes'),
+    indexPattern: /.*routes(\.ts|\.js|\.cjs|\.mjs)$/
+  });
 
   app.ready(err => {
     if (err) throw err
