@@ -11,7 +11,8 @@ async function initApp() {
   app.register(fastifyPlugin(docs));
   app.register(autoload, {
     dir: path.join(__dirname, 'routes'),
-    indexPattern: /.*routes(\.ts|\.js|\.cjs|\.mjs)$/
+    indexPattern: /.*routes(\.ts|\.js|\.cjs|\.mjs)$/,
+    options: { prefix: '/api' }
   });
 
   app.ready(err => {
