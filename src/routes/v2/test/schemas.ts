@@ -17,6 +17,7 @@ export const queryStringSchema = Type.Object({
 
 export const TestRouteSchema : FastifySchema = {
   description: 'Test route description',
+  tags: ['test'],
   querystring: queryStringSchema,
   response: {
     200: responseBodySchema,
