@@ -22,5 +22,10 @@ export function build(opts: FastifyServerOptions) {
     app.swagger();
   });
 
+  app.gracefulShutdown((signal, next) => {
+    // Release resources
+    next();
+  })
+
   return app;
 }

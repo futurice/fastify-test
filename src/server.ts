@@ -5,10 +5,10 @@ import config from './config';
 
 const startServer = () => {
   const app = build({ logger: true });
-  app.listen(config.PORT, (err, address) => {
+  app.listen(config.PORT, (err) => {
     if (err) {
       console.log(err.message);
-      process.exit(1)
+      process.exit(1);
     }
   });
 };
