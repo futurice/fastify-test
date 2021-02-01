@@ -4,7 +4,7 @@ import { testHandler } from './handlers';
 
 
 const routes: FastifyPluginAsync = async (fastify) => {
-  fastify.get('/', { schema: TestRouteSchema }, testHandler);
+  fastify.get('/:id', { schema: TestRouteSchema }, testHandler);
 };
 
 export default routes;

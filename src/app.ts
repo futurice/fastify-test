@@ -1,12 +1,12 @@
 import path from 'path'
-import fastify, { FastifyServerOptions } from 'fastify'
+import fastify, { FastifyInstance, FastifyServerOptions } from 'fastify'
 import fastifyPlugin from 'fastify-plugin'
 import autoload from 'fastify-autoload'
 import gracefulShutdown from 'fastify-graceful-shutdown';
 import { docs } from './docs';
 
 
-export function build(opts: FastifyServerOptions) {
+export function build(opts: FastifyServerOptions): FastifyInstance {
   const app = fastify(opts);
   app.register(gracefulShutdown);
   app.register(fastifyPlugin(docs));
@@ -21,11 +21,6 @@ export function build(opts: FastifyServerOptions) {
     // Builds docs
     app.swagger();
   });
-
-  app.gracefulShutdown((signal, next) => {
-    // Release resources
-    next();
-  })
 
   return app;
 }
