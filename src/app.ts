@@ -4,12 +4,14 @@ import fastifyPlugin from 'fastify-plugin'
 import autoload from 'fastify-autoload'
 import gracefulShutdown from 'fastify-graceful-shutdown';
 import { docs } from './docs';
+import { validator } from './plugins/basicAuth';
 
 
 export function build(opts: FastifyServerOptions): FastifyInstance {
   const app = fastify(opts);
   app.register(gracefulShutdown);
   app.register(fastifyPlugin(docs));
+  app.register(fastifyPlugin(validator))
   app.register(autoload, {
     dir: path.join(__dirname, 'routes'),
     indexPattern: /.*routes(\.ts|\.js|\.cjs|\.mjs)$/,
