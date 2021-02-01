@@ -8,13 +8,14 @@ export const requestBodySchema = Type.Object({
 export const  responseBodySchema = Type.Object({
   ok: Type.Boolean(),
   number: Type.Number(),
+  someString: Type.String(),
 });
 
 export const queryStringSchema = Type.Object({
   test: Type.ReadonlyOptional(Type.Number({ minimum: 200 })),
 });
 
-export const paramSchem = Type.Object({
+export const paramSchema = Type.Object({
   id: Type.Readonly(Type.String({ format: 'uuid' })),
 });
 
@@ -22,7 +23,7 @@ export const TestRouteSchema : FastifySchema = {
   description: 'Test route description',
   tags: ['test'],
   querystring: queryStringSchema,
-  params: paramSchem,
+  params: paramSchema,
   response: {
     200: responseBodySchema,
   },

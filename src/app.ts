@@ -21,6 +21,11 @@ export function build(opts: FastifyServerOptions): FastifyInstance {
     // Builds docs
     app.swagger();
   });
+  
+  app.addHook('onClose', (instance, done) => {
+    // Release resources
+    done();
+  });
 
   return app;
 }

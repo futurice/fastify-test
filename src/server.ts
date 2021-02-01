@@ -4,7 +4,7 @@ import config from './config';
 
 
 const startServer = () => {
-  const app = build({ logger: true });
+  const app = build({ logger: { prettyPrint: true }});
   app.listen(config.PORT, (err) => {
     if (err) {
       console.log(err.message);
