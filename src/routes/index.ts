@@ -10,14 +10,12 @@ const routes: FastifyPluginAsync = async fastify => {
     res.send('pong');
   });
 
-  console.log(path.join(__dirname));
-
   fastify.register(autoload, {
     dir: path.join(__dirname),
-    indexPattern: /.*routes\.ts/,
+    indexPattern: /.*routes(\.ts|\.js|\.cjs|\.mjs)$/,
     // Ignore this file to avoid autoload
     // trying to re-register this plugin.
-    ignorePattern: /index.ts/,
+    ignorePattern: /index(\.ts|\.js|\.cjs|\.mjs)$/,
     options: { prefix: '/api' },
   });
 };

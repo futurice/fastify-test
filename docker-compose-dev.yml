@@ -11,9 +11,9 @@ services:
       - ./src:/app/server/src
       - ./tsconfig.json:/app/server/tsconfig.json
     environment:
-      - PORT=4000
+      - PORT=8080
     ports:
-      - 4000:4000
+      - 8080:8080
     networks:
       - fastify-test
 
