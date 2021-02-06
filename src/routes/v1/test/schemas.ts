@@ -5,7 +5,7 @@ export const requestBodySchema = Type.Object({
   email: Type.Readonly(Type.String({ format: 'email' })),
 });
 
-export const  responseBodySchema = Type.Object({
+export const responseBodySchema = Type.Object({
   ok: Type.Boolean(),
   number: Type.Number(),
   someString: Type.String(),
@@ -19,7 +19,7 @@ export const paramSchema = Type.Object({
   id: Type.Readonly(Type.String({ format: 'uuid' })),
 });
 
-export const TestRouteSchema : FastifySchema = {
+export const TestRouteSchema: FastifySchema = {
   description: 'Test route description',
   tags: ['test'],
   querystring: queryStringSchema,
@@ -27,4 +27,4 @@ export const TestRouteSchema : FastifySchema = {
   response: {
     200: responseBodySchema,
   },
-}
+};
