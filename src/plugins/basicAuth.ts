@@ -6,7 +6,7 @@ type Validation = (
   password: string,
   req: FastifyRequest,
   reply: FastifyReply,
-  done: (err?: Error) => void
+  done: (err?: Error) => void,
 ) => void | Promise<void>;
 
 export const validate: Validation = (username, password, req, reply, done) => {
@@ -16,8 +16,8 @@ export const validate: Validation = (username, password, req, reply, done) => {
   }
 
   done(new Error('None shall pass!'));
-}
+};
 
-export const validator: FastifyPluginAsync = async (fastify) => {
-  fastify.register(basicAuth, { validate })
+export const validator: FastifyPluginAsync = async fastify => {
+  fastify.register(basicAuth, { validate });
 };
