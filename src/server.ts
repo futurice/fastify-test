@@ -1,4 +1,3 @@
-import throng from 'throng';
 import { build } from './app';
 import config from './config';
 
@@ -12,9 +11,4 @@ const startServer = () => {
   });
 };
 
-throng({
-  workers: config.WEB_CONCURRENCY,
-  lifetime: Infinity,
-  start: startServer,
-  grace: 10000, // Grace period for shutting down workers
-});
+startServer();

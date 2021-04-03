@@ -7,11 +7,8 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   extends: [
-    'eslint:recommended',
-    'prettier/@typescript-eslint',
-    'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    'prettier',
   ],
   rules: {
     'no-shadow': 'error',
