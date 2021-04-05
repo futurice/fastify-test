@@ -15,7 +15,7 @@ const routes: FastifyPluginAsync = async fastify => {
   // App service pings the root URL to check that the container is up
   // and running. Respond with a dummy response so our logs are not
   // littered 404s from GET "/".
-  fastify.get('/', (req, res) => {
+  fastify.get('/', { schema: { hide: true } }, (req, res) => {
     res.send('pong');
   });
 
