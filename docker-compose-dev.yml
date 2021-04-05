@@ -12,12 +12,35 @@ services:
       - ./tsconfig.json:/app/server/tsconfig.json
     environment:
       - PORT=8080
+      - DATABASE_URL=http://wappu:wappu@db:5432/wappudev
     ports:
       - 8080:8080
     networks:
       - fastify-test
 
+  db:
+    image: postgres:11
+    environment:
+      - POSTGRES_USER=wappu
+      - POSTGRES_PASSWORD=wappu
+      - POSTGRES_DB=wappudev
+    networks:
+      - fastify-test
+    volumes:
+      - pgdata:/var/lib/wappums/postgresql/data
+    ports:
+      - 5432:5432
+    healthcheck: # Used for waiting the db to be up and running
+      test: ['CMD-SHELL', 'pg_isready --dbname=wappudev --username=wappu']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
 networks:
   fastify-test:
     external:
       name: fastify-test-network
+
+volumes:
+  pgdata:
+    driver: local
