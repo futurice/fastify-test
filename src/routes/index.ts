@@ -1,8 +1,17 @@
 import path from 'path';
 import { FastifyPluginAsync } from 'fastify';
 import autoload from 'fastify-autoload';
+import { docs } from '../plugins/docs';
 
 const routes: FastifyPluginAsync = async fastify => {
+  fastify.register(docs);
+
+  fastify.ready(err => {
+    if (err) throw err;
+    // Builds docs
+    fastify.swagger();
+  });
+
   // App service pings the root URL to check that the container is up
   // and running. Respond with a dummy response so our logs are not
   // littered 404s from GET "/".
