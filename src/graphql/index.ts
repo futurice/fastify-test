@@ -4,7 +4,7 @@ import mercurius from 'mercurius';
 import mercuriusCodegen from 'mercurius-codegen';
 import { PrismaClient } from '@prisma/client';
 import schema from './schema';
-import resolvers from './resolvers/feedResolver';
+import resolvers from './resolvers';
 
 const plugin: FastifyPluginCallback = (instance, opts, done) => {
   instance.register(mercurius, {

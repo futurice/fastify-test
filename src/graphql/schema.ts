@@ -3,8 +3,14 @@ import { gql } from 'mercurius-codegen';
 export default gql`
   scalar DateTime
 
+  enum Sort {
+    NEWEST
+    HOT
+    BEST
+  }
+
   type Query {
-    feed(skip: Int, take: Int): [FeedItem]
+    feed(skip: Int, take: Int, sort: Sort): [FeedItem]!
   }
 
   type FeedItem {

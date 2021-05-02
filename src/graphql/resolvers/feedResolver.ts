@@ -1,16 +1,21 @@
 import { IResolvers } from 'mercurius';
-import { DateTimeResolver } from 'graphql-scalars';
+import * as yup from 'yup';
+import { Sort } from '../generated/types';
+
+const feedQueryParamSchema = yup.object().shape({
+  skip: yup.number().integer().default(0).min(0),
+  take: yup.number().integer().max(100).min(0).default(20),
+  sort: yup.mixed<Sort>().oneOf(Object.values(Sort)).default(Sort.NEWEST),
+});
 
 const resolvers: IResolvers = {
-  DateTime: DateTimeResolver,
   Query: {
-    feed: (root, { skip, take }, ctx) => {
-      return ctx.prisma.feedItem
-        .findMany({
-          skip: skip ?? 0,
-          take: take ?? 20,
-        })
-        .then(result => result ?? []);
+    feed: (_, args, ctx) => {
+      const { skip, take } = feedQueryParamSchema.validateSync(args);
+      return ctx.prisma.feedItem.findMany({
+        skip,
+        take,
+      });
     },
   },
 };

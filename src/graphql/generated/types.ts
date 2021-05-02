@@ -35,14 +35,21 @@ export type Scalars = {
   _FieldSet: any;
 };
 
+export enum Sort {
+  NEWEST = "NEWEST",
+  HOT = "HOT",
+  BEST = "BEST",
+}
+
 export type Query = {
   __typename?: "Query";
-  feed?: Maybe<Array<Maybe<FeedItem>>>;
+  feed: Array<Maybe<FeedItem>>;
 };
 
 export type QueryfeedArgs = {
   skip?: Maybe<Scalars["Int"]>;
   take?: Maybe<Scalars["Int"]>;
+  sort?: Maybe<Sort>;
 };
 
 export type FeedItem = {
@@ -163,6 +170,7 @@ export type DirectiveResolverFn<
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   DateTime: ResolverTypeWrapper<Scalars["DateTime"]>;
+  Sort: Sort;
   Query: ResolverTypeWrapper<{}>;
   Int: ResolverTypeWrapper<Scalars["Int"]>;
   FeedItem: ResolverTypeWrapper<FeedItem>;
@@ -190,7 +198,7 @@ export type QueryResolvers<
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
 > = {
   feed?: Resolver<
-    Maybe<Array<Maybe<ResolversTypes["FeedItem"]>>>,
+    Array<Maybe<ResolversTypes["FeedItem"]>>,
     ParentType,
     ContextType,
     RequireFields<QueryfeedArgs, never>
