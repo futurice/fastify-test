@@ -11,6 +11,8 @@ export default gql`
 
   type Query {
     feed(skip: Int, take: Int, sort: Sort): [FeedItem]!
+    guild: [Guild]!
+    actionType: [ActionType]!
   }
 
   type FeedItem {
@@ -18,5 +20,22 @@ export default gql`
     content: String
     createdAt: DateTime
     updatedAt: DateTime
+  }
+
+  type Guild {
+    id: Int
+    name: String
+    logo: String
+  }
+
+  type ActionType {
+    id: Int
+    code: String
+    name: String
+    value: Int
+    cooldown: Int
+    createdAt: DateTime
+    updatedAt: DateTime
+    isUserAction: Boolean
   }
 `;

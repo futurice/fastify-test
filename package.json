@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prestart": "npm run clean",
-    "start": "prisma migrate dev && npm run watch",
+    "start": "prisma migrate deploy && npm run watch",
     "postinstall": "npm run prisma:generate",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"wait-on dist/server.js && npm run watch-node\"",
     "clean": "rimraf dist",
@@ -16,7 +16,8 @@
     "watch-node": "nodemon dist/server.js",
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "prisma:seed": "prisma db seed --preview-feature"
   },
   "keywords": [],
   "author": "",

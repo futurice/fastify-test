@@ -7,9 +7,79 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model FeedItem {
+model Guilds {
   id        Int      @id @default(autoincrement())
-  content   String
+  name      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+  logo      String
+  user      Users[]
+}
+
+model Users {
+  id        Int         @id @default(autoincrement())
+  uuid      String      @unique @default(uuid())
+  name      String
+  team      Guilds      @relation(fields: [teamId], references: [id])
+  teamId    Int
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now())
+  isBanned  Boolean     @default(false)
+  feedItem  FeedItems[]
+  Actions   Actions[]
+  Comments  Comments[]
+}
+
+enum FeedItemType {
+  TEXT
+  IMAGE
+}
+
+model FeedItems {
+  id        Int          @id @default(autoincrement())
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @default(now())
+  user      Users        @relation(fields: [userId], references: [id])
+  userId    Int
+  image     String?
+  text      String?
+  type      FeedItemType
+  isBanned  Boolean      @default(false)
+  isSticky  Boolean      @default(false)
+  Comments  Comments[]
+}
+
+model ActionTypes {
+  id           Int       @id @default(autoincrement())
+  code         String    @unique
+  name         String
+  value        Int
+  cooldown     Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
+  isUserAction Boolean   @default(true)
+  Actions      Actions[]
+}
+
+model Actions {
+  id            Int         @id @default(autoincrement())
+  user          Users       @relation(fields: [userId], references: [id])
+  userId        Int
+  actionType    ActionTypes @relation(fields: [actionTypesId], references: [id])
+  actionTypesId Int
+  imagePath     String?
+  text          String?
+  aggregated    Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @default(now())
+  isBanned      Boolean     @default(false)
+}
+
+model Comments {
+  id          Int       @id @default(autoincrement())
+  user        Users     @relation(fields: [usersId], references: [id])
+  usersId     Int
+  feedItem    FeedItems @relation(fields: [feedItemsId], references: [id])
+  feedItemsId Int
+  text        String
 }

@@ -12,7 +12,7 @@ const resolvers: IResolvers = {
   Query: {
     feed: (_, args, ctx) => {
       const { skip, take } = feedQueryParamSchema.validateSync(args);
-      return ctx.prisma.feedItem.findMany({
+      return ctx.prisma.feedItems.findMany({
         skip,
         take,
       });

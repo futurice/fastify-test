@@ -44,6 +44,8 @@ export enum Sort {
 export type Query = {
   __typename?: "Query";
   feed: Array<Maybe<FeedItem>>;
+  guild: Array<Maybe<Guild>>;
+  actionType: Array<Maybe<ActionType>>;
 };
 
 export type QueryfeedArgs = {
@@ -58,6 +60,25 @@ export type FeedItem = {
   content?: Maybe<Scalars["String"]>;
   createdAt?: Maybe<Scalars["DateTime"]>;
   updatedAt?: Maybe<Scalars["DateTime"]>;
+};
+
+export type Guild = {
+  __typename?: "Guild";
+  id?: Maybe<Scalars["Int"]>;
+  name?: Maybe<Scalars["String"]>;
+  logo?: Maybe<Scalars["String"]>;
+};
+
+export type ActionType = {
+  __typename?: "ActionType";
+  id?: Maybe<Scalars["Int"]>;
+  code?: Maybe<Scalars["String"]>;
+  name?: Maybe<Scalars["String"]>;
+  value?: Maybe<Scalars["Int"]>;
+  cooldown?: Maybe<Scalars["Int"]>;
+  createdAt?: Maybe<Scalars["DateTime"]>;
+  updatedAt?: Maybe<Scalars["DateTime"]>;
+  isUserAction?: Maybe<Scalars["Boolean"]>;
 };
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -175,6 +196,8 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars["Int"]>;
   FeedItem: ResolverTypeWrapper<FeedItem>;
   String: ResolverTypeWrapper<Scalars["String"]>;
+  Guild: ResolverTypeWrapper<Guild>;
+  ActionType: ResolverTypeWrapper<ActionType>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
 };
 
@@ -185,6 +208,8 @@ export type ResolversParentTypes = {
   Int: Scalars["Int"];
   FeedItem: FeedItem;
   String: Scalars["String"];
+  Guild: Guild;
+  ActionType: ActionType;
   Boolean: Scalars["Boolean"];
 };
 
@@ -202,6 +227,16 @@ export type QueryResolvers<
     ParentType,
     ContextType,
     RequireFields<QueryfeedArgs, never>
+  >;
+  guild?: Resolver<
+    Array<Maybe<ResolversTypes["Guild"]>>,
+    ParentType,
+    ContextType
+  >;
+  actionType?: Resolver<
+    Array<Maybe<ResolversTypes["ActionType"]>>,
+    ParentType,
+    ContextType
   >;
 };
 
@@ -224,10 +259,49 @@ export type FeedItemResolvers<
   isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GuildResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["Guild"] = ResolversParentTypes["Guild"]
+> = {
+  id?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  logo?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ActionTypeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["ActionType"] = ResolversParentTypes["ActionType"]
+> = {
+  id?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
+  code?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  value?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
+  cooldown?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
+  createdAt?: Resolver<
+    Maybe<ResolversTypes["DateTime"]>,
+    ParentType,
+    ContextType
+  >;
+  updatedAt?: Resolver<
+    Maybe<ResolversTypes["DateTime"]>,
+    ParentType,
+    ContextType
+  >;
+  isUserAction?: Resolver<
+    Maybe<ResolversTypes["Boolean"]>,
+    ParentType,
+    ContextType
+  >;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type Resolvers<ContextType = any> = {
   DateTime?: GraphQLScalarType;
   Query?: QueryResolvers<ContextType>;
   FeedItem?: FeedItemResolvers<ContextType>;
+  Guild?: GuildResolvers<ContextType>;
+  ActionType?: ActionTypeResolvers<ContextType>;
 };
 
 /**
@@ -270,6 +344,38 @@ export interface Loaders<
     updatedAt?: LoaderResolver<
       Maybe<Scalars["DateTime"]>,
       FeedItem,
+      {},
+      TContext
+    >;
+  };
+
+  Guild?: {
+    id?: LoaderResolver<Maybe<Scalars["Int"]>, Guild, {}, TContext>;
+    name?: LoaderResolver<Maybe<Scalars["String"]>, Guild, {}, TContext>;
+    logo?: LoaderResolver<Maybe<Scalars["String"]>, Guild, {}, TContext>;
+  };
+
+  ActionType?: {
+    id?: LoaderResolver<Maybe<Scalars["Int"]>, ActionType, {}, TContext>;
+    code?: LoaderResolver<Maybe<Scalars["String"]>, ActionType, {}, TContext>;
+    name?: LoaderResolver<Maybe<Scalars["String"]>, ActionType, {}, TContext>;
+    value?: LoaderResolver<Maybe<Scalars["Int"]>, ActionType, {}, TContext>;
+    cooldown?: LoaderResolver<Maybe<Scalars["Int"]>, ActionType, {}, TContext>;
+    createdAt?: LoaderResolver<
+      Maybe<Scalars["DateTime"]>,
+      ActionType,
+      {},
+      TContext
+    >;
+    updatedAt?: LoaderResolver<
+      Maybe<Scalars["DateTime"]>,
+      ActionType,
+      {},
+      TContext
+    >;
+    isUserAction?: LoaderResolver<
+      Maybe<Scalars["Boolean"]>,
+      ActionType,
       {},
       TContext
     >;
