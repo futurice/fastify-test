@@ -13,7 +13,7 @@ services:
       - ./prisma:/app/server/prisma
     environment:
       - PORT=8080
-      - DATABASE_URL=http://wappu:wappu@db:5432/wappudev
+      - DATABASE_URL=postgres://wappu:wappu@db:5432/wappudev
     ports:
       - 8080:8080
     networks:
