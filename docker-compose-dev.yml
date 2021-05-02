@@ -10,6 +10,7 @@ services:
     volumes:
       - ./src:/app/server/src
       - ./tsconfig.json:/app/server/tsconfig.json
+      - ./prisma:/app/server/prisma
     environment:
       - PORT=8080
       - DATABASE_URL=http://wappu:wappu@db:5432/wappudev

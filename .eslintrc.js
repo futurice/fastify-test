@@ -10,6 +10,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'prettier',
   ],
+  ignorePatterns: ["**/generated/*"],
   rules: {
     'no-shadow': 'error',
     '@typescript-eslint/no-use-before-define': [
