@@ -10,6 +10,12 @@ export default gql`
     BEST
   }
 
+  enum ActionTypes {
+    SIMA
+    IMAGE
+    TEXT
+  }
+
   type Query {
     feed(skip: Int, take: Int, sort: Sort): [FeedItem]!
     guild: [Guild]!
@@ -18,6 +24,7 @@ export default gql`
 
   input ActionInsertInput {
     text: String
+    actionType: ActionTypes
   }
 
   type Mutation {

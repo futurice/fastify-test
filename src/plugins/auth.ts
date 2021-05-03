@@ -57,8 +57,6 @@ const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
         });
     };
 
-    console.log(typeof validateUser);
-
     instance.decorate('auth', {
       validateToken,
       validateUser,

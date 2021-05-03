@@ -43,6 +43,12 @@ export enum Sort {
   BEST = "BEST",
 }
 
+export enum ActionTypes {
+  SIMA = "SIMA",
+  IMAGE = "IMAGE",
+  TEXT = "TEXT",
+}
+
 export type Query = {
   __typename?: "Query";
   feed: Array<Maybe<FeedItem>>;
@@ -58,6 +64,7 @@ export type QueryfeedArgs = {
 
 export type ActionInsertInput = {
   text?: Maybe<Scalars["String"]>;
+  actionType?: Maybe<ActionTypes>;
 };
 
 export type Mutation = {
@@ -208,6 +215,7 @@ export type ResolversTypes = {
   DateTime: ResolverTypeWrapper<Scalars["DateTime"]>;
   Void: ResolverTypeWrapper<Scalars["Void"]>;
   Sort: Sort;
+  ActionTypes: ActionTypes;
   Query: ResolverTypeWrapper<{}>;
   Int: ResolverTypeWrapper<Scalars["Int"]>;
   ActionInsertInput: ActionInsertInput;
