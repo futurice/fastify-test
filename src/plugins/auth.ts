@@ -1,21 +1,28 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
+import { Users } from '@prisma/client';
 import * as yup from 'yup';
-
-const userHeaderSchema = yup.object().shape({
-  'x-api-token': yup.string().required(),
-});
 
 interface ITokenPluginOpts {
   token: string;
 }
 
-const validate = (obj: unknown) => userHeaderSchema.validate(obj);
+const userHeaderSchema = yup.object().shape({
+  'x-user-uuid': yup.string().uuid().required(),
+});
+
+const validateUserSchema = (obj: unknown) => userHeaderSchema.validate(obj);
+
+const tokenHeaderSchema = yup.object().shape({
+  'x-api-token': yup.string().required(),
+});
+
+const validateTokenSchema = (obj: unknown) => tokenHeaderSchema.validate(obj);
 
 const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
   async (instance, opts) => {
-    const validateRequest = (req: FastifyRequest) => {
-      return validate(req.headers)
+    const validateToken = (req: FastifyRequest) => {
+      return validateTokenSchema(req.headers)
         .catch(err => {
           if (err instanceof yup.ValidationError) {
             throw instance.httpErrors.unauthorized(err.errors.join(', '));
@@ -26,16 +33,35 @@ const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
         })
         .then(result => {
           if (result['x-api-token'] === opts.token) {
-            // TODO User object
-            return {};
+            return;
           }
 
           throw instance.httpErrors.unauthorized('Incorrect api token ');
         });
     };
 
+    const validateUser = (req: FastifyRequest) => {
+      return validateUserSchema(req.headers)
+        .catch(err => {
+          if (err instanceof yup.ValidationError) {
+            throw instance.httpErrors.badRequest(err.errors.join(', '));
+          }
+          instance.log.warn('Unexpected validation error', err);
+
+          throw instance.httpErrors.internalServerError();
+        })
+        .then(result => {
+          return instance.prisma.users.findUnique({
+            where: { uuid: result['x-user-uuid'] },
+          });
+        });
+    };
+
+    console.log(typeof validateUser);
+
     instance.decorate('auth', {
-      validateRequest,
+      validateToken,
+      validateUser,
     });
   },
 );
@@ -43,7 +69,8 @@ const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
 declare module 'fastify' {
   interface FastifyInstance {
     auth: {
-      validateRequest: typeof validate;
+      validateToken: (req: FastifyRequest) => Promise<void>;
+      validateUser: (req: FastifyRequest) => Promise<Users | null>;
     };
   }
 }

@@ -16,6 +16,6 @@ export default fastifyPlugin(plugin);
 
 declare module 'fastify' {
   interface FastifyInstance {
-    prisma: typeof PrismaClient;
+    prisma: PrismaClient;
   }
 }
