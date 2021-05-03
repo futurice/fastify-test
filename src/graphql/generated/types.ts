@@ -32,6 +32,8 @@ export type Scalars = {
   Float: number;
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   DateTime: any;
+  /** Represents NULL values */
+  Void: any;
   _FieldSet: any;
 };
 
@@ -52,6 +54,19 @@ export type QueryfeedArgs = {
   skip?: Maybe<Scalars["Int"]>;
   take?: Maybe<Scalars["Int"]>;
   sort?: Maybe<Sort>;
+};
+
+export type ActionInsertInput = {
+  text?: Maybe<Scalars["String"]>;
+};
+
+export type Mutation = {
+  __typename?: "Mutation";
+  actionInsert?: Maybe<Scalars["Void"]>;
+};
+
+export type MutationactionInsertArgs = {
+  input?: Maybe<ActionInsertInput>;
 };
 
 export type FeedItem = {
@@ -191,11 +206,14 @@ export type DirectiveResolverFn<
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   DateTime: ResolverTypeWrapper<Scalars["DateTime"]>;
+  Void: ResolverTypeWrapper<Scalars["Void"]>;
   Sort: Sort;
   Query: ResolverTypeWrapper<{}>;
   Int: ResolverTypeWrapper<Scalars["Int"]>;
-  FeedItem: ResolverTypeWrapper<FeedItem>;
+  ActionInsertInput: ActionInsertInput;
   String: ResolverTypeWrapper<Scalars["String"]>;
+  Mutation: ResolverTypeWrapper<{}>;
+  FeedItem: ResolverTypeWrapper<FeedItem>;
   Guild: ResolverTypeWrapper<Guild>;
   ActionType: ResolverTypeWrapper<ActionType>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
@@ -204,10 +222,13 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   DateTime: Scalars["DateTime"];
+  Void: Scalars["Void"];
   Query: {};
   Int: Scalars["Int"];
-  FeedItem: FeedItem;
+  ActionInsertInput: ActionInsertInput;
   String: Scalars["String"];
+  Mutation: {};
+  FeedItem: FeedItem;
   Guild: Guild;
   ActionType: ActionType;
   Boolean: Scalars["Boolean"];
@@ -216,6 +237,11 @@ export type ResolversParentTypes = {
 export interface DateTimeScalarConfig
   extends GraphQLScalarTypeConfig<ResolversTypes["DateTime"], any> {
   name: "DateTime";
+}
+
+export interface VoidScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes["Void"], any> {
+  name: "Void";
 }
 
 export type QueryResolvers<
@@ -237,6 +263,18 @@ export type QueryResolvers<
     Array<Maybe<ResolversTypes["ActionType"]>>,
     ParentType,
     ContextType
+  >;
+};
+
+export type MutationResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["Mutation"] = ResolversParentTypes["Mutation"]
+> = {
+  actionInsert?: Resolver<
+    Maybe<ResolversTypes["Void"]>,
+    ParentType,
+    ContextType,
+    RequireFields<MutationactionInsertArgs, never>
   >;
 };
 
@@ -298,7 +336,9 @@ export type ActionTypeResolvers<
 
 export type Resolvers<ContextType = any> = {
   DateTime?: GraphQLScalarType;
+  Void?: GraphQLScalarType;
   Query?: QueryResolvers<ContextType>;
+  Mutation?: MutationResolvers<ContextType>;
   FeedItem?: FeedItemResolvers<ContextType>;
   Guild?: GuildResolvers<ContextType>;
   ActionType?: ActionTypeResolvers<ContextType>;

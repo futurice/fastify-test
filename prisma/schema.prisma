@@ -26,8 +26,8 @@ model Users {
   updatedAt DateTime    @default(now())
   isBanned  Boolean     @default(false)
   feedItem  FeedItems[]
-  Actions   Actions[]
-  Comments  Comments[]
+  actions   Actions[]
+  comments  Comments[]
 }
 
 enum FeedItemType {
@@ -46,7 +46,9 @@ model FeedItems {
   type      FeedItemType
   isBanned  Boolean      @default(false)
   isSticky  Boolean      @default(false)
-  Comments  Comments[]
+  comments  Comments[]
+  action    Actions      @relation(fields: [actionsId], references: [id])
+  actionsId Int
 }
 
 model ActionTypes {
@@ -58,7 +60,7 @@ model ActionTypes {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now())
   isUserAction Boolean   @default(true)
-  Actions      Actions[]
+  actions      Actions[]
 }
 
 model Actions {
@@ -73,6 +75,7 @@ model Actions {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @default(now())
   isBanned      Boolean     @default(false)
+  feedItems     FeedItems[]
 }
 
 model Comments {

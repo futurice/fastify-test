@@ -1,7 +1,8 @@
-import { gql } from 'mercurius-codegen';
+import gql from 'graphql-tag';
 
 export default gql`
   scalar DateTime
+  scalar Void
 
   enum Sort {
     NEWEST
@@ -13,6 +14,14 @@ export default gql`
     feed(skip: Int, take: Int, sort: Sort): [FeedItem]!
     guild: [Guild]!
     actionType: [ActionType]!
+  }
+
+  input ActionInsertInput {
+    text: String
+  }
+
+  type Mutation {
+    actionInsert(input: ActionInsertInput): Void
   }
 
   type FeedItem {

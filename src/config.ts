@@ -4,6 +4,7 @@ const configSchema = yup.object({
   NODE_ENV: yup.string().default('development'),
   PORT: yup.number().default(8000),
   DATABASE_URL: yup.string().required(),
+  TOKEN: yup.string().required(),
 });
 
 export type Config = yup.Asserts<typeof configSchema>;

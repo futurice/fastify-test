@@ -2,7 +2,7 @@ import { IResolvers } from 'mercurius';
 
 const resolvers: IResolvers = {
   Query: {
-    actionType: (_, __, ctx) => {
+    actionType: (_, args, ctx, info) => {
       return ctx.prisma.actionTypes.findMany();
     },
   },

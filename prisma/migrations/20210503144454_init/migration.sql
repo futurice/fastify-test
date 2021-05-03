@@ -36,6 +36,7 @@ CREATE TABLE "FeedItems" (
     "type" "FeedItemType" NOT NULL,
     "isBanned" BOOLEAN NOT NULL DEFAULT false,
     "isSticky" BOOLEAN NOT NULL DEFAULT false,
+    "actionsId" INTEGER NOT NULL,
 
     PRIMARY KEY ("id")
 );
@@ -93,6 +94,9 @@ ALTER TABLE "Users" ADD FOREIGN KEY ("teamId") REFERENCES "Guilds"("id") ON DELE
 
 -- AddForeignKey
 ALTER TABLE "FeedItems" ADD FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FeedItems" ADD FOREIGN KEY ("actionsId") REFERENCES "Actions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Actions" ADD FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
