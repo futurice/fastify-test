@@ -3,20 +3,13 @@ import fastifyPlugin from 'fastify-plugin';
 import mercurius from 'mercurius';
 import mercuriusCodegen from 'mercurius-codegen';
 import { PrismaClient, Users } from '@prisma/client';
-import { applyMiddleware } from 'graphql-middleware';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import permissions from './permissions';
-import typeDefs from './typedefs';
 import resolvers from './resolvers';
+import schema from './schema';
 
 const plugin: FastifyPluginCallback = async (instance, opts, done) => {
-  const schemaWithMiddleware = applyMiddleware(
-    makeExecutableSchema({ typeDefs, resolvers }),
-    permissions,
-  );
-
   instance.register(mercurius, {
-    schema: schemaWithMiddleware,
+    schema,
+    resolvers,
     graphiql: 'playground',
     prefix: '/api',
     context: req =>

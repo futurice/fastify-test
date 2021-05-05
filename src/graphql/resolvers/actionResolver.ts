@@ -65,7 +65,6 @@ const resolvers: IResolvers = {
         })
         .then(() => null)
         .catch(err => {
-          console.log('HERE', err);
           return null;
         });
     },

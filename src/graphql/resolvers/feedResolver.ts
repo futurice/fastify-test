@@ -1,3 +1,4 @@
+import { PrismaSelect } from '../util/PrismaSelect';
 import { IResolvers } from 'mercurius';
 import * as yup from 'yup';
 import { Sort } from '../generated/types';
@@ -10,11 +11,13 @@ const feedQueryParamSchema = yup.object().shape({
 
 const resolvers: IResolvers = {
   Query: {
-    feed: (_, args, ctx) => {
+    feed: (_, args, ctx, info) => {
       const { skip, take } = feedQueryParamSchema.validateSync(args);
+      const select = new PrismaSelect(info).value;
       return ctx.prisma.feedItems.findMany({
         skip,
         take,
+        ...select,
       });
     },
   },

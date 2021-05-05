@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from 'mercurius-codegen';
 
 export default gql`
   scalar DateTime
@@ -31,11 +31,17 @@ export default gql`
     actionInsert(input: ActionInsertInput): Void
   }
 
+  type User {
+    name: String
+    team: Guild
+  }
+
   type FeedItem {
     id: Int
-    content: String
+    text: String
     createdAt: DateTime
     updatedAt: DateTime
+    user: User
   }
 
   type Guild {

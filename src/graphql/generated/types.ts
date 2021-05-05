@@ -76,12 +76,19 @@ export type MutationactionInsertArgs = {
   input?: Maybe<ActionInsertInput>;
 };
 
+export type User = {
+  __typename?: "User";
+  name?: Maybe<Scalars["String"]>;
+  team?: Maybe<Guild>;
+};
+
 export type FeedItem = {
   __typename?: "FeedItem";
   id?: Maybe<Scalars["Int"]>;
-  content?: Maybe<Scalars["String"]>;
+  text?: Maybe<Scalars["String"]>;
   createdAt?: Maybe<Scalars["DateTime"]>;
   updatedAt?: Maybe<Scalars["DateTime"]>;
+  user?: Maybe<User>;
 };
 
 export type Guild = {
@@ -221,6 +228,7 @@ export type ResolversTypes = {
   ActionInsertInput: ActionInsertInput;
   String: ResolverTypeWrapper<Scalars["String"]>;
   Mutation: ResolverTypeWrapper<{}>;
+  User: ResolverTypeWrapper<User>;
   FeedItem: ResolverTypeWrapper<FeedItem>;
   Guild: ResolverTypeWrapper<Guild>;
   ActionType: ResolverTypeWrapper<ActionType>;
@@ -236,6 +244,7 @@ export type ResolversParentTypes = {
   ActionInsertInput: ActionInsertInput;
   String: Scalars["String"];
   Mutation: {};
+  User: User;
   FeedItem: FeedItem;
   Guild: Guild;
   ActionType: ActionType;
@@ -286,12 +295,21 @@ export type MutationResolvers<
   >;
 };
 
+export type UserResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["User"] = ResolversParentTypes["User"]
+> = {
+  name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  team?: Resolver<Maybe<ResolversTypes["Guild"]>, ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type FeedItemResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["FeedItem"] = ResolversParentTypes["FeedItem"]
 > = {
   id?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
-  content?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  text?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   createdAt?: Resolver<
     Maybe<ResolversTypes["DateTime"]>,
     ParentType,
@@ -302,6 +320,7 @@ export type FeedItemResolvers<
     ParentType,
     ContextType
   >;
+  user?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
   isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -347,6 +366,7 @@ export type Resolvers<ContextType = any> = {
   Void?: GraphQLScalarType;
   Query?: QueryResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  User?: UserResolvers<ContextType>;
   FeedItem?: FeedItemResolvers<ContextType>;
   Guild?: GuildResolvers<ContextType>;
   ActionType?: ActionTypeResolvers<ContextType>;
@@ -380,9 +400,14 @@ export interface Loaders<
     reply: import("fastify").FastifyReply;
   }
 > {
+  User?: {
+    name?: LoaderResolver<Maybe<Scalars["String"]>, User, {}, TContext>;
+    team?: LoaderResolver<Maybe<Guild>, User, {}, TContext>;
+  };
+
   FeedItem?: {
     id?: LoaderResolver<Maybe<Scalars["Int"]>, FeedItem, {}, TContext>;
-    content?: LoaderResolver<Maybe<Scalars["String"]>, FeedItem, {}, TContext>;
+    text?: LoaderResolver<Maybe<Scalars["String"]>, FeedItem, {}, TContext>;
     createdAt?: LoaderResolver<
       Maybe<Scalars["DateTime"]>,
       FeedItem,
@@ -395,6 +420,7 @@ export interface Loaders<
       {},
       TContext
     >;
+    user?: LoaderResolver<Maybe<User>, FeedItem, {}, TContext>;
   };
 
   Guild?: {
