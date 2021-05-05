@@ -11,18 +11,17 @@ const userHeaderSchema = yup.object().shape({
   'x-user-uuid': yup.string().uuid().required(),
 });
 
-const validateUserSchema = (obj: unknown) => userHeaderSchema.validate(obj);
-
 const tokenHeaderSchema = yup.object().shape({
   'x-api-token': yup.string().required(),
 });
 
-const validateTokenSchema = (obj: unknown) => tokenHeaderSchema.validate(obj);
+const validateSchema = (schema: yup.AnySchema, obj: unknown) =>
+  schema.validate(obj);
 
 const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
   async (instance, opts) => {
     const validateToken = (req: FastifyRequest) => {
-      return validateTokenSchema(req.headers)
+      return validateSchema(tokenHeaderSchema, req.headers)
         .catch(err => {
           if (err instanceof yup.ValidationError) {
             throw instance.httpErrors.unauthorized(err.errors.join(', '));
@@ -41,7 +40,7 @@ const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
     };
 
     const validateUser = (req: FastifyRequest) => {
-      return validateUserSchema(req.headers)
+      return validateSchema(userHeaderSchema, req.headers)
         .catch(err => {
           if (err instanceof yup.ValidationError) {
             throw instance.httpErrors.badRequest(err.errors.join(', '));
