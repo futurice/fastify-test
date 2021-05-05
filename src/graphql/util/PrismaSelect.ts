@@ -1,3 +1,5 @@
+// Credits
+// https://github.com/paljs/prisma-tools/blob/ab6296bb5a087c4b4786255b7cbbe4eb22bce507/packages/plugins/src/select.ts
 import { GraphQLResolveInfo } from 'graphql';
 import { DMMF } from '@prisma/client/runtime';
 import graphqlFields from 'graphql-fields';
