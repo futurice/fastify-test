@@ -1,5 +1,5 @@
 import { IResolvers } from 'mercurius';
-import { ActionTypes } from './../generated/types';
+import { ActionTypes } from '../generated/types';
 import * as yup from 'yup';
 import { Prisma, FeedItemType, Users } from '@prisma/client';
 

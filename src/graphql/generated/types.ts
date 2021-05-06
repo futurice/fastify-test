@@ -37,34 +37,77 @@ export type Scalars = {
   _FieldSet: any;
 };
 
+export type Query = {
+  __typename?: "Query";
+  feed: Array<Maybe<Feed>>;
+  guild: Array<Maybe<Guild>>;
+  actionType: Array<Maybe<ActionType>>;
+};
+
+export type QueryfeedArgs = {
+  sort?: Maybe<Sort>;
+};
+
+/** A list of auto- and user generated content */
+export type Feed = {
+  __typename?: "Feed";
+  /** Feed item id. */
+  id: Scalars["Int"];
+  /** Feed item text content */
+  text?: Maybe<Scalars["String"]>;
+  /** UTC creation time stamp */
+  createdAt: Scalars["DateTime"];
+  /** UTC update time stamp */
+  updatedAt: Scalars["DateTime"];
+  /** User whose action generated the feed item, or null if item is system generated. */
+  creator?: Maybe<User>;
+};
+
+/** Registered whappuapp user */
+export type User = {
+  __typename?: "User";
+  /** User name */
+  name: Scalars["String"];
+  /** UTC creation time stamp */
+  createdAt: Scalars["DateTime"];
+  /** The guild user belongs to. */
+  guild: Guild;
+};
+
+/** Subject association, a.k.a guild */
+export type Guild = {
+  __typename?: "Guild";
+  id: Scalars["Int"];
+  /** Guild name */
+  name: Scalars["String"];
+  /** URL to guild logo */
+  logo: Scalars["String"];
+};
+
+/** Feed sorting method */
 export enum Sort {
   NEWEST = "NEWEST",
   HOT = "HOT",
   BEST = "BEST",
 }
 
-export enum ActionTypes {
-  SIMA = "SIMA",
-  IMAGE = "IMAGE",
-  TEXT = "TEXT",
-}
-
-export type Query = {
-  __typename?: "Query";
-  feed: Array<Maybe<FeedItem>>;
-  guild: Array<Maybe<Guild>>;
-  actionType: Array<Maybe<ActionType>>;
-};
-
-export type QueryfeedArgs = {
-  skip?: Maybe<Scalars["Int"]>;
-  take?: Maybe<Scalars["Int"]>;
-  sort?: Maybe<Sort>;
-};
-
-export type ActionInsertInput = {
-  text?: Maybe<Scalars["String"]>;
-  actionType?: Maybe<ActionTypes>;
+export type ActionType = {
+  __typename?: "ActionType";
+  /** Action type id. */
+  id: Scalars["Int"];
+  /** Unique string identifier */
+  code: Scalars["String"];
+  /** User facing name */
+  name: Scalars["String"];
+  /** Point value */
+  value: Scalars["Int"];
+  /** Length of period when action cannot be repeated in ms */
+  cooldown: Scalars["Int"];
+  /** UTC timestamp of when action toook place */
+  createdAt: Scalars["DateTime"];
+  updatedAt: Scalars["DateTime"];
+  /** Can a user invoke this action */
+  isUserAction: Scalars["Boolean"];
 };
 
 export type Mutation = {
@@ -73,42 +116,19 @@ export type Mutation = {
 };
 
 export type MutationactionInsertArgs = {
-  input?: Maybe<ActionInsertInput>;
+  input: actionInsertInput;
 };
 
-export type User = {
-  __typename?: "User";
-  name?: Maybe<Scalars["String"]>;
-  team?: Maybe<Guild>;
-};
-
-export type FeedItem = {
-  __typename?: "FeedItem";
-  id?: Maybe<Scalars["Int"]>;
+export type actionInsertInput = {
+  actionType: ActionTypes;
   text?: Maybe<Scalars["String"]>;
-  createdAt?: Maybe<Scalars["DateTime"]>;
-  updatedAt?: Maybe<Scalars["DateTime"]>;
-  user?: Maybe<User>;
 };
 
-export type Guild = {
-  __typename?: "Guild";
-  id?: Maybe<Scalars["Int"]>;
-  name?: Maybe<Scalars["String"]>;
-  logo?: Maybe<Scalars["String"]>;
-};
-
-export type ActionType = {
-  __typename?: "ActionType";
-  id?: Maybe<Scalars["Int"]>;
-  code?: Maybe<Scalars["String"]>;
-  name?: Maybe<Scalars["String"]>;
-  value?: Maybe<Scalars["Int"]>;
-  cooldown?: Maybe<Scalars["Int"]>;
-  createdAt?: Maybe<Scalars["DateTime"]>;
-  updatedAt?: Maybe<Scalars["DateTime"]>;
-  isUserAction?: Maybe<Scalars["Boolean"]>;
-};
+export enum ActionTypes {
+  SIMA = "SIMA",
+  IMAGE = "IMAGE",
+  TEXT = "TEXT",
+}
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
 
@@ -219,54 +239,44 @@ export type DirectiveResolverFn<
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
-  DateTime: ResolverTypeWrapper<Scalars["DateTime"]>;
-  Void: ResolverTypeWrapper<Scalars["Void"]>;
-  Sort: Sort;
-  ActionTypes: ActionTypes;
   Query: ResolverTypeWrapper<{}>;
+  Feed: ResolverTypeWrapper<Feed>;
   Int: ResolverTypeWrapper<Scalars["Int"]>;
-  ActionInsertInput: ActionInsertInput;
   String: ResolverTypeWrapper<Scalars["String"]>;
-  Mutation: ResolverTypeWrapper<{}>;
+  DateTime: ResolverTypeWrapper<Scalars["DateTime"]>;
   User: ResolverTypeWrapper<User>;
-  FeedItem: ResolverTypeWrapper<FeedItem>;
   Guild: ResolverTypeWrapper<Guild>;
+  Sort: Sort;
   ActionType: ResolverTypeWrapper<ActionType>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]>;
+  Mutation: ResolverTypeWrapper<{}>;
+  Void: ResolverTypeWrapper<Scalars["Void"]>;
+  actionInsertInput: actionInsertInput;
+  ActionTypes: ActionTypes;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  DateTime: Scalars["DateTime"];
-  Void: Scalars["Void"];
   Query: {};
+  Feed: Feed;
   Int: Scalars["Int"];
-  ActionInsertInput: ActionInsertInput;
   String: Scalars["String"];
-  Mutation: {};
+  DateTime: Scalars["DateTime"];
   User: User;
-  FeedItem: FeedItem;
   Guild: Guild;
   ActionType: ActionType;
   Boolean: Scalars["Boolean"];
+  Mutation: {};
+  Void: Scalars["Void"];
+  actionInsertInput: actionInsertInput;
 };
-
-export interface DateTimeScalarConfig
-  extends GraphQLScalarTypeConfig<ResolversTypes["DateTime"], any> {
-  name: "DateTime";
-}
-
-export interface VoidScalarConfig
-  extends GraphQLScalarTypeConfig<ResolversTypes["Void"], any> {
-  name: "Void";
-}
 
 export type QueryResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"]
 > = {
   feed?: Resolver<
-    Array<Maybe<ResolversTypes["FeedItem"]>>,
+    Array<Maybe<ResolversTypes["Feed"]>>,
     ParentType,
     ContextType,
     RequireFields<QueryfeedArgs, never>
@@ -283,6 +293,58 @@ export type QueryResolvers<
   >;
 };
 
+export type FeedResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["Feed"] = ResolversParentTypes["Feed"]
+> = {
+  id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  text?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  creator?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export interface DateTimeScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes["DateTime"], any> {
+  name: "DateTime";
+}
+
+export type UserResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["User"] = ResolversParentTypes["User"]
+> = {
+  name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  guild?: Resolver<ResolversTypes["Guild"], ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GuildResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["Guild"] = ResolversParentTypes["Guild"]
+> = {
+  id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  logo?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ActionTypeResolvers<
+  ContextType = any,
+  ParentType extends ResolversParentTypes["ActionType"] = ResolversParentTypes["ActionType"]
+> = {
+  id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  code?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  value?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  cooldown?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  isUserAction?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
+  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type MutationResolvers<
   ContextType = any,
   ParentType extends ResolversParentTypes["Mutation"] = ResolversParentTypes["Mutation"]
@@ -291,85 +353,24 @@ export type MutationResolvers<
     Maybe<ResolversTypes["Void"]>,
     ParentType,
     ContextType,
-    RequireFields<MutationactionInsertArgs, never>
+    RequireFields<MutationactionInsertArgs, "input">
   >;
 };
 
-export type UserResolvers<
-  ContextType = any,
-  ParentType extends ResolversParentTypes["User"] = ResolversParentTypes["User"]
-> = {
-  name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  team?: Resolver<Maybe<ResolversTypes["Guild"]>, ParentType, ContextType>;
-  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type FeedItemResolvers<
-  ContextType = any,
-  ParentType extends ResolversParentTypes["FeedItem"] = ResolversParentTypes["FeedItem"]
-> = {
-  id?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
-  text?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  createdAt?: Resolver<
-    Maybe<ResolversTypes["DateTime"]>,
-    ParentType,
-    ContextType
-  >;
-  updatedAt?: Resolver<
-    Maybe<ResolversTypes["DateTime"]>,
-    ParentType,
-    ContextType
-  >;
-  user?: Resolver<Maybe<ResolversTypes["User"]>, ParentType, ContextType>;
-  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type GuildResolvers<
-  ContextType = any,
-  ParentType extends ResolversParentTypes["Guild"] = ResolversParentTypes["Guild"]
-> = {
-  id?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  logo?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type ActionTypeResolvers<
-  ContextType = any,
-  ParentType extends ResolversParentTypes["ActionType"] = ResolversParentTypes["ActionType"]
-> = {
-  id?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
-  code?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  value?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
-  cooldown?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
-  createdAt?: Resolver<
-    Maybe<ResolversTypes["DateTime"]>,
-    ParentType,
-    ContextType
-  >;
-  updatedAt?: Resolver<
-    Maybe<ResolversTypes["DateTime"]>,
-    ParentType,
-    ContextType
-  >;
-  isUserAction?: Resolver<
-    Maybe<ResolversTypes["Boolean"]>,
-    ParentType,
-    ContextType
-  >;
-  isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
+export interface VoidScalarConfig
+  extends GraphQLScalarTypeConfig<ResolversTypes["Void"], any> {
+  name: "Void";
+}
 
 export type Resolvers<ContextType = any> = {
-  DateTime?: GraphQLScalarType;
-  Void?: GraphQLScalarType;
   Query?: QueryResolvers<ContextType>;
-  Mutation?: MutationResolvers<ContextType>;
+  Feed?: FeedResolvers<ContextType>;
+  DateTime?: GraphQLScalarType;
   User?: UserResolvers<ContextType>;
-  FeedItem?: FeedItemResolvers<ContextType>;
   Guild?: GuildResolvers<ContextType>;
   ActionType?: ActionTypeResolvers<ContextType>;
+  Mutation?: MutationResolvers<ContextType>;
+  Void?: GraphQLScalarType;
 };
 
 /**
@@ -400,59 +401,35 @@ export interface Loaders<
     reply: import("fastify").FastifyReply;
   }
 > {
-  User?: {
-    name?: LoaderResolver<Maybe<Scalars["String"]>, User, {}, TContext>;
-    team?: LoaderResolver<Maybe<Guild>, User, {}, TContext>;
+  Feed?: {
+    id?: LoaderResolver<Scalars["Int"], Feed, {}, TContext>;
+    text?: LoaderResolver<Maybe<Scalars["String"]>, Feed, {}, TContext>;
+    createdAt?: LoaderResolver<Scalars["DateTime"], Feed, {}, TContext>;
+    updatedAt?: LoaderResolver<Scalars["DateTime"], Feed, {}, TContext>;
+    creator?: LoaderResolver<Maybe<User>, Feed, {}, TContext>;
   };
 
-  FeedItem?: {
-    id?: LoaderResolver<Maybe<Scalars["Int"]>, FeedItem, {}, TContext>;
-    text?: LoaderResolver<Maybe<Scalars["String"]>, FeedItem, {}, TContext>;
-    createdAt?: LoaderResolver<
-      Maybe<Scalars["DateTime"]>,
-      FeedItem,
-      {},
-      TContext
-    >;
-    updatedAt?: LoaderResolver<
-      Maybe<Scalars["DateTime"]>,
-      FeedItem,
-      {},
-      TContext
-    >;
-    user?: LoaderResolver<Maybe<User>, FeedItem, {}, TContext>;
+  User?: {
+    name?: LoaderResolver<Scalars["String"], User, {}, TContext>;
+    createdAt?: LoaderResolver<Scalars["DateTime"], User, {}, TContext>;
+    guild?: LoaderResolver<Guild, User, {}, TContext>;
   };
 
   Guild?: {
-    id?: LoaderResolver<Maybe<Scalars["Int"]>, Guild, {}, TContext>;
-    name?: LoaderResolver<Maybe<Scalars["String"]>, Guild, {}, TContext>;
-    logo?: LoaderResolver<Maybe<Scalars["String"]>, Guild, {}, TContext>;
+    id?: LoaderResolver<Scalars["Int"], Guild, {}, TContext>;
+    name?: LoaderResolver<Scalars["String"], Guild, {}, TContext>;
+    logo?: LoaderResolver<Scalars["String"], Guild, {}, TContext>;
   };
 
   ActionType?: {
-    id?: LoaderResolver<Maybe<Scalars["Int"]>, ActionType, {}, TContext>;
-    code?: LoaderResolver<Maybe<Scalars["String"]>, ActionType, {}, TContext>;
-    name?: LoaderResolver<Maybe<Scalars["String"]>, ActionType, {}, TContext>;
-    value?: LoaderResolver<Maybe<Scalars["Int"]>, ActionType, {}, TContext>;
-    cooldown?: LoaderResolver<Maybe<Scalars["Int"]>, ActionType, {}, TContext>;
-    createdAt?: LoaderResolver<
-      Maybe<Scalars["DateTime"]>,
-      ActionType,
-      {},
-      TContext
-    >;
-    updatedAt?: LoaderResolver<
-      Maybe<Scalars["DateTime"]>,
-      ActionType,
-      {},
-      TContext
-    >;
-    isUserAction?: LoaderResolver<
-      Maybe<Scalars["Boolean"]>,
-      ActionType,
-      {},
-      TContext
-    >;
+    id?: LoaderResolver<Scalars["Int"], ActionType, {}, TContext>;
+    code?: LoaderResolver<Scalars["String"], ActionType, {}, TContext>;
+    name?: LoaderResolver<Scalars["String"], ActionType, {}, TContext>;
+    value?: LoaderResolver<Scalars["Int"], ActionType, {}, TContext>;
+    cooldown?: LoaderResolver<Scalars["Int"], ActionType, {}, TContext>;
+    createdAt?: LoaderResolver<Scalars["DateTime"], ActionType, {}, TContext>;
+    updatedAt?: LoaderResolver<Scalars["DateTime"], ActionType, {}, TContext>;
+    isUserAction?: LoaderResolver<Scalars["Boolean"], ActionType, {}, TContext>;
   };
 }
 declare module "mercurius" {
