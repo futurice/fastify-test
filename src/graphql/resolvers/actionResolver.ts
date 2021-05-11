@@ -1,7 +1,7 @@
 import { Resolver, Arg, Mutation, InputType, Ctx, Field } from 'type-graphql';
 import { Actions } from '@generated/type-graphql/models';
 import { Prisma, Users, FeedItemType } from '@prisma/client';
-import { IsNotEmpty, Length, ValidateIf } from 'class-validator';
+import { Max } from 'class-validator';
 import { MercuriusContext } from 'mercurius';
 import { registerEnumType } from 'type-graphql';
 
@@ -20,8 +20,7 @@ class ActionsInsertInput {
   actionType: ActionTypes;
 
   @Field({ nullable: true })
-  @Length(1, 500)
-  @IsNotEmpty()
+  @Max(500)
   text: string;
 }
 
@@ -50,22 +49,22 @@ const generateFeedItem = (
 };
 
 Resolver(of => Actions);
-export class ActionsResolver {
+export class ActionsCreateResolver {
   @Mutation(() => Boolean)
-  insertAction(
-    @Arg('input', type => ActionsInsertInput) input: ActionsInsertInput,
+  createAction(
+    @Arg('data', type => ActionsInsertInput) data: ActionsInsertInput,
     @Ctx() { prisma, user }: MercuriusContext,
   ): Promise<boolean> {
-    const feedItem = generateFeedItem(user as Users, input);
+    const feedItem = generateFeedItem(user as Users, data);
     return prisma.actions
       .create({
         data: {
           actionType: {
             connect: {
-              code: input.actionType,
+              code: data.actionType,
             },
           },
-          text: input.text,
+          text: data.text,
           user: {
             connect: {
               uuid: user?.uuid,

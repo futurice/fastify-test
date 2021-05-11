@@ -7,20 +7,23 @@ import {
   FindFirstFeedItemsResolver,
   FindManyFeedItemsResolver,
   FindManyGuildsResolver,
+  FindFirstGuildsResolver,
   relationResolvers,
 } from '@generated/type-graphql';
 import { applyMiddleware } from 'graphql-middleware';
 import permissions from './permissions';
 import { buildSchema } from 'type-graphql';
-import { ActionsResolver } from './resolvers/actionResolver';
+import { ActionsCreateResolver, CommentCreateResolver } from './resolvers';
 
 const plugin: FastifyPluginCallback = async (instance, opts, done) => {
   const schema = await buildSchema({
     resolvers: [
       FindFirstFeedItemsResolver,
       FindManyFeedItemsResolver,
+      FindFirstGuildsResolver,
       FindManyGuildsResolver,
-      ActionsResolver,
+      ActionsCreateResolver,
+      CommentCreateResolver,
       ...relationResolvers,
     ],
     validate: false,

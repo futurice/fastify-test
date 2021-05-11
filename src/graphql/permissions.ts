@@ -15,11 +15,13 @@ export default shield(
       findManyGuilds: isAuthenticated,
     },
     Mutation: {
-      insertAction: isAuthenticated,
+      createAction: isAuthenticated,
+      createComment: isAuthenticated,
     },
     FeedItems: isAuthenticated,
     Guilds: isAuthenticated,
     Users: isAuthenticated,
+    Comments: isAuthenticated,
   },
   {
     fallbackRule: deny,
