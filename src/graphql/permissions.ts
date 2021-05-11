@@ -14,6 +14,9 @@ export default shield(
       findManyFeedItems: isAuthenticated,
       findManyGuilds: isAuthenticated,
     },
+    Mutation: {
+      insertAction: isAuthenticated,
+    },
     FeedItems: isAuthenticated,
     Guilds: isAuthenticated,
     Users: isAuthenticated,
