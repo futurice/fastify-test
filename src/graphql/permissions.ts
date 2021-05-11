@@ -1,4 +1,4 @@
-import { rule, shield } from 'graphql-shield';
+import { rule, shield, deny } from 'graphql-shield';
 import { MercuriusContext } from 'mercurius';
 
 const isAuthenticated = rule({ cache: 'contextual' })(
@@ -8,8 +8,17 @@ const isAuthenticated = rule({ cache: 'contextual' })(
 );
 
 export default shield(
-  {},
   {
-    fallbackRule: isAuthenticated,
+    Query: {
+      findFirstFeedItems: isAuthenticated,
+      findManyFeedItems: isAuthenticated,
+      findManyGuilds: isAuthenticated,
+    },
+    FeedItems: isAuthenticated,
+    Guilds: isAuthenticated,
+    Users: isAuthenticated,
+  },
+  {
+    fallbackRule: deny,
   },
 );
