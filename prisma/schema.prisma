@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator typegraphql {
+  provider = "typegraphql-prisma"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -17,7 +21,9 @@ model Guilds {
 }
 
 model Users {
+  /// @TypeGraphQL.omit(output: true)
   id        Int         @id @default(autoincrement())
+  /// @TypeGraphQL.omit(output: true)
   uuid      String      @unique @default(uuid())
   name      String
   team      Guilds      @relation(fields: [teamId], references: [id])
