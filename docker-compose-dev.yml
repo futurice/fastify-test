@@ -40,8 +40,7 @@ services:
 
 networks:
   fastify-test:
-    external:
-      name: fastify-test-network
+    driver: bridge
 
 volumes:
   pgdata:
