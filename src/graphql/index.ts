@@ -2,47 +2,35 @@ import 'reflect-metadata';
 import { FastifyPluginCallback } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import mercurius from 'mercurius';
-import { PrismaClient, Users } from '@prisma/client';
-import {
-  FindFirstFeedItemsResolver,
-  FindManyFeedItemsResolver,
-  FindManyGuildsResolver,
-  FindFirstGuildsResolver,
-  relationResolvers,
-} from '@generated/type-graphql';
-import { applyMiddleware } from 'graphql-middleware';
-import permissions from './permissions';
 import { buildSchema } from 'type-graphql';
-import { ActionsCreateResolver, CommentCreateResolver } from './resolvers';
+import { createPool, DatabasePoolType } from 'slonik';
+import config from '../config';
+import { FeedItemResolver } from './resolvers/feedItemResolver';
 
 const plugin: FastifyPluginCallback = async (instance, opts, done) => {
-  const schema = await buildSchema({
-    resolvers: [
-      FindFirstFeedItemsResolver,
-      FindManyFeedItemsResolver,
-      FindFirstGuildsResolver,
-      FindManyGuildsResolver,
-      ActionsCreateResolver,
-      CommentCreateResolver,
-      ...relationResolvers,
-    ],
-    validate: false,
+  instance.decorateRequest('db', {});
+  instance.addHook('preHandler', (req, _, next) => {
+    req.db = createPool(config.DATABASE_URL);
+    next();
   });
 
-  const schemaWithMiddleware = applyMiddleware(schema, permissions);
+  const schema = await buildSchema({
+    resolvers: [FeedItemResolver],
+  });
 
   instance.register(mercurius, {
-    schema: schemaWithMiddleware,
+    schema,
     graphiql: 'playground',
     prefix: '/api',
-    context: req =>
-      instance.auth
-        .validateToken(req)
-        .then(() => instance.auth.validateUser(req))
-        .then(user => ({
-          user: user,
-          prisma: instance.prisma,
-        })),
+    context: async req => {
+      const { db } = req;
+      return {
+        db,
+        user: await instance.auth
+          .validateToken(req)
+          .then(() => instance.auth.validateUser(req)),
+      };
+    },
   });
 
   done();
@@ -50,8 +38,13 @@ const plugin: FastifyPluginCallback = async (instance, opts, done) => {
 
 declare module 'mercurius' {
   interface MercuriusContext {
-    prisma: PrismaClient;
-    user: Users | null;
+    db: DatabasePoolType;
+  }
+}
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    db: DatabasePoolType;
   }
 }
 

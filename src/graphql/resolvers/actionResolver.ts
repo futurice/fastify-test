@@ -1,5 +1,5 @@
+/*
 import { Resolver, Arg, Mutation, InputType, Ctx, Field } from 'type-graphql';
-import { Actions } from '@generated/type-graphql/models';
 import { Prisma, Users, FeedItemType } from '@prisma/client';
 import { Max } from 'class-validator';
 import { MercuriusContext } from 'mercurius';
@@ -27,6 +27,7 @@ class ActionsInsertInput {
 /**
  * @returns Appropriate feed item, or undefined if given action type should not generate a feed item.
  */
+/*
 const generateFeedItem = (
   user: Users,
   input: ActionsInsertInput,
@@ -79,3 +80,4 @@ export class ActionsCreateResolver {
       });
   }
 }
+*/

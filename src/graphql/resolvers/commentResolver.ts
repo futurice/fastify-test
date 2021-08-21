@@ -1,8 +1,7 @@
 import { Resolver, Arg, Mutation, InputType, Ctx, Field } from 'type-graphql';
-import { Comments } from '@generated/type-graphql/models';
 import { Max } from 'class-validator';
 import { MercuriusContext } from 'mercurius';
-
+/*
 @InputType()
 class CommentCreateInput {
   @Field()
@@ -37,3 +36,4 @@ export class CommentCreateResolver {
     });
   }
 }
+*/

@@ -1,6 +1,8 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyInstance } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
+import { NotFoundError } from 'slonik';
 import * as yup from 'yup';
+import { findById } from '../queries/user';
 
 interface ITokenPluginOpts {
   token: string;
@@ -32,8 +34,12 @@ const validateUser = (instance: FastifyInstance) => (req: FastifyRequest) =>
       throw instance.httpErrors.internalServerError();
     })
     .then(result => {
-      return instance.prisma.users.findUnique({
-        where: { uuid: result['x-user-uuid'] },
+      return req.db.one(findById(result['x-user-uuid'])).catch(err => {
+        if (err instanceof NotFoundError) {
+          throw instance.httpErrors.unauthorized();
+        }
+
+        throw instance.httpErrors.internalServerError();
       });
     });
 

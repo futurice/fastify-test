@@ -1,6 +1,6 @@
 # This docker compose file is intended for setting up an environment for local
 # development
-version: '3.4'
+version: '3.8'
 services:
   backend:
     build:
@@ -10,15 +10,37 @@ services:
     volumes:
       - ./src:/app/server/src
       - ./tsconfig.json:/app/server/tsconfig.json
-      - ./prisma:/app/server/prisma
     environment:
       - PORT=8080
       - DATABASE_URL=postgres://wappu:wappu@db:5432/wappudev
       - TOKEN
     ports:
       - 8080:8080
+    depends_on:
+      - db
+      - migrations
     networks:
-      - fastify-test
+      - wappu-backend
+
+  migrations:
+    image: flyway/flyway:7-alpine
+    command: migrate
+    volumes:
+      - ./migrations:/flyway/sql/migrations
+      - ./seeds:/flyway/sql/seeds
+    environment:
+      FLYWAY_URL: jdbc:postgresql://db:5432/wappudev
+      FLYWAY_USER: wappu
+      FLYWAY_PASSWORD: wappu
+    healthcheck: # Used for waiting the db to be up and running
+      test: ['CMD', 'flyway validate']
+      interval: 2s
+      timeout: 5s
+      retries: 20
+    networks:
+      - wappu-backend
+    depends_on:
+      - db
 
   db:
     image: postgres:11
@@ -27,7 +49,7 @@ services:
       - POSTGRES_PASSWORD=wappu
       - POSTGRES_DB=wappudev
     networks:
-      - fastify-test
+      - wappu-backend
     volumes:
       - pgdata:/var/lib/wappums/postgresql/data
     ports:
@@ -39,7 +61,7 @@ services:
       retries: 20
 
 networks:
-  fastify-test:
+  wappu-backend:
     driver: bridge
 
 volumes:
