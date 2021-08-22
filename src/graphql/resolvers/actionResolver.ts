@@ -1,9 +1,15 @@
-/*
-import { Resolver, Arg, Mutation, InputType, Ctx, Field } from 'type-graphql';
-import { Prisma, Users, FeedItemType } from '@prisma/client';
-import { Max } from 'class-validator';
+import {
+  Resolver,
+  Arg,
+  Mutation,
+  InputType,
+  Ctx,
+  Field,
+  ObjectType,
+} from 'type-graphql';
 import { MercuriusContext } from 'mercurius';
 import { registerEnumType } from 'type-graphql';
+import * as action from '../../queries/action';
 
 enum ActionTypes {
   TEXT = 'TEXT',
@@ -16,68 +22,43 @@ registerEnumType(ActionTypes, {
 
 @InputType()
 class ActionsInsertInput {
-  @Field(type => ActionTypes)
-  actionType: ActionTypes;
+  @Field({ nullable: true })
+  imageData: string;
 
   @Field({ nullable: true })
-  @Max(500)
   text: string;
+
+  @Field(() => ActionTypes)
+  type: ActionTypes;
 }
 
-/**
- * @returns Appropriate feed item, or undefined if given action type should not generate a feed item.
- */
-/*
-const generateFeedItem = (
-  user: Users,
-  input: ActionsInsertInput,
-): Prisma.FeedItemsCreateNestedOneWithoutActionInput | undefined => {
-  if (input.actionType === ActionTypes.TEXT) {
-    return {
-      create: {
-        text: input.text,
-        type: FeedItemType.TEXT,
-        user: {
-          connect: {
-            uuid: user.uuid,
-          },
-        },
-      },
-    };
-  }
+@ObjectType()
+class ActionInsertResult {
+  @Field()
+  success: boolean;
+}
 
-  return undefined;
-};
-
-Resolver(of => Actions);
-export class ActionsCreateResolver {
-  @Mutation(() => Boolean)
-  createAction(
+Resolver();
+export class ActionResolver {
+  @Mutation(() => ActionInsertResult)
+  async insertAction(
     @Arg('data', type => ActionsInsertInput) data: ActionsInsertInput,
-    @Ctx() { prisma, user }: MercuriusContext,
-  ): Promise<boolean> {
-    const feedItem = generateFeedItem(user as Users, data);
-    return prisma.actions
-      .create({
-        data: {
-          actionType: {
-            connect: {
-              code: data.actionType,
-            },
-          },
-          text: data.text,
-          user: {
-            connect: {
-              uuid: user?.uuid,
-            },
-          },
-          feedItem,
-        },
+    @Ctx() ctx: MercuriusContext,
+  ): Promise<ActionInsertResult> {
+    return await ctx.db
+      .transaction(async trx => {
+        // TODO Upload image somewhere™
+        const result = await ctx.db.one(
+          action.create({
+            userId: ctx.user.id,
+            actionTypeCode: data.type,
+            imagePath: data.imageData ?? null,
+            text: data.text ?? null,
+          }),
+        );
       })
-      .then(() => true)
-      .catch(err => {
-        return false;
-      });
+      .then(() => ({
+        success: true,
+      }));
   }
 }
-*/

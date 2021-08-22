@@ -6,6 +6,9 @@ import { buildSchema } from 'type-graphql';
 import { createPool, DatabasePoolType } from 'slonik';
 import config from '../config';
 import { FeedItemResolver } from './resolvers/feedItemResolver';
+import { ActionTypeResolver } from './resolvers/actionTypeResolver';
+import { ActionResolver } from './resolvers/actionResolver';
+import { User } from '../queries/user';
 
 const plugin: FastifyPluginCallback = async (instance, opts, done) => {
   instance.decorateRequest('db', {});
@@ -15,7 +18,7 @@ const plugin: FastifyPluginCallback = async (instance, opts, done) => {
   });
 
   const schema = await buildSchema({
-    resolvers: [FeedItemResolver],
+    resolvers: [FeedItemResolver, ActionTypeResolver, ActionResolver],
   });
 
   instance.register(mercurius, {
@@ -39,6 +42,7 @@ const plugin: FastifyPluginCallback = async (instance, opts, done) => {
 declare module 'mercurius' {
   interface MercuriusContext {
     db: DatabasePoolType;
+    user: User;
   }
 }
 

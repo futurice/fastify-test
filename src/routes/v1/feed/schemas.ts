@@ -1,6 +1,5 @@
 import { Type } from '@sinclair/typebox';
 
-// eslint-disable-next-line no-shadow
 export enum FeedSort {
   New,
   Hot,

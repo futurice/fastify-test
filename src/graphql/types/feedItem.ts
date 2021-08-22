@@ -3,7 +3,7 @@ import { Field, ObjectType } from 'type-graphql';
 @ObjectType()
 class FeedItem {
   @Field()
-  readonly uuid: string;
+  uuid: string;
 
   @Field()
   text?: string;

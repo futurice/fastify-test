@@ -6,10 +6,7 @@ import * as feedItem from '../../queries/feedItem';
 @Resolver()
 export class FeedItemResolver {
   @Query(returns => [FeedItem])
-  async feedItem(
-    @Ctx() ctx: MercuriusContext,
-  ) /* : Promise<Readonly<FeedItem[]>>*/ {
-    const result = await ctx.db.query(feedItem.findAll());
-    return result.rows;
+  async feedItem(@Ctx() ctx: MercuriusContext): Promise<Readonly<FeedItem[]>> {
+    return await ctx.db.any(feedItem.findAll());
   }
 }
