@@ -2,7 +2,6 @@ import { FastifyPluginAsync, FastifyRequest, FastifyInstance } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { NotFoundError } from 'slonik';
 import * as yup from 'yup';
-import { findById } from '../queries/user';
 
 interface ITokenPluginOpts {
   token: string;
@@ -34,13 +33,15 @@ const validateUser = (instance: FastifyInstance) => (req: FastifyRequest) =>
       throw instance.httpErrors.internalServerError();
     })
     .then(result => {
-      return req.db.one(findById(result['x-user-uuid'])).catch(err => {
-        if (err instanceof NotFoundError) {
-          throw instance.httpErrors.unauthorized();
-        }
+      return req.db
+        .one(req.sql.user.findById(result['x-user-uuid']))
+        .catch(err => {
+          if (err instanceof NotFoundError) {
+            throw instance.httpErrors.unauthorized();
+          }
 
-        throw instance.httpErrors.internalServerError();
-      });
+          throw instance.httpErrors.internalServerError();
+        });
     });
 
 const validateToken = (instance: FastifyInstance, opts: ITokenPluginOpts) => (
