@@ -1,29 +1,28 @@
-import * as yup from 'yup';
+import { Codec, string, GetType } from 'purify-ts';
+import { NumberFromString } from 'purify-ts-extra-codec';
 
-const configSchema = yup.object({
-  NODE_ENV: yup.string().default('development'),
-  PORT: yup.number().default(8000),
-  DATABASE_URL: yup.string().required(),
-  TOKEN: yup.string().required(),
+const configSchema = Codec.interface({
+  NODE_ENV: string,
+  PORT: NumberFromString,
+  DATABASE_URL: string,
+  TOKEN: string,
 });
 
-export type Config = yup.Asserts<typeof configSchema>;
+export type Config = GetType<typeof configSchema>;
 
 let config!: Config;
 
 if (config === undefined) {
-  try {
-    config = configSchema.validateSync(process.env, {
-      abortEarly: false,
-      stripUnknown: true,
+  configSchema
+    .decode(process.env)
+    .ifRight(encoded => {
+      config = encoded;
+    })
+    .ifLeft(err => {
+      console.error(`Configuration validation failed: ${err}`);
+      console.error('Shutting down the process...');
+      process.exit(1);
     });
-  } catch (err) {
-    const validationErr = err as yup.ValidationError;
-    console.error('Configuration validation failed:');
-    console.error(`${validationErr.name}: ${validationErr.errors.join(', ')}`);
-    console.error('Shutting down the process...');
-    process.exit(1);
-  }
 }
 
 export default config;

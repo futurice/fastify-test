@@ -10,11 +10,13 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
   const routes: string[] = [];
 
   instance.addHook('onRoute', route => {
-    routes.push(`[${route.method}]\t${route.path}`);
+    if (!route.schema?.hide) {
+      routes.push(`[${route.method}]\t${route.path}`);
+    }
   });
 
   instance.addHook('onReady', done => {
-    console.log(routes.join('\n'));
+    instance.log.info(`Routes:\n${routes.join('\n')}`);
     done();
   });
 

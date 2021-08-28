@@ -1,4 +1,4 @@
-import { Codec, string, boolean, enumeration } from 'purify-ts/Codec';
+import { Codec, string, boolean, enumeration, optional } from 'purify-ts/Codec';
 
 export enum ActionType {
   IMAGE = 'IMAGE',
@@ -7,8 +7,8 @@ export enum ActionType {
 }
 
 export const CreateActionInput = Codec.interface({
-  imageData: string,
-  text: string,
+  imageData: optional(string),
+  text: optional(string),
   type: enumeration(ActionType),
 });
 
