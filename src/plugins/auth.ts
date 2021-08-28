@@ -1,6 +1,5 @@
 import {
   FastifyPluginAsync,
-  FastifyRequest,
   FastifyInstance,
   RouteShorthandOptions,
 } from 'fastify';
@@ -10,6 +9,8 @@ import { TObject, TAny, Type, TProperties } from '@sinclair/typebox';
 import fastifyPlugin from 'fastify-plugin';
 import { NotFoundError } from 'slonik';
 import fastifyAuth from 'fastify-auth';
+import { UserType } from '../plugins/db/queries/user-queries';
+
 interface ITokenPluginOpts {
   token: string;
 }
@@ -36,7 +37,7 @@ const verifyToken = (
   done();
 };
 
-const verifyUser = (instance: FastifyInstance): preHandlerHookHandler => (
+const verifyUser = (instance: FastifyInstance): preHandlerHookHandler => async (
   req,
   res,
   done,
@@ -47,13 +48,15 @@ const verifyUser = (instance: FastifyInstance): preHandlerHookHandler => (
     throw instance.httpErrors.unauthorized();
   }
 
-  const user = req.db.one(req.sql.user.findById(userUuid)).catch(err => {
+  const user = await req.db.one(req.sql.user.findById(userUuid)).catch(err => {
     if (err instanceof NotFoundError) {
       throw instance.httpErrors.unauthorized();
     }
 
     throw instance.httpErrors.internalServerError();
   });
+
+  req.user = user;
 
   done();
 };
@@ -88,6 +91,7 @@ const mergeOpts = (
 const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
   async (instance, pluginOpts) => {
     await instance.register(fastifyAuth);
+    instance.decorateRequest('user', {});
 
     const secureRoute: FastifyInstance['secureRoute'] = {
       authenticated: (opts: RouteShorthandOptions) =>
@@ -119,6 +123,10 @@ declare module 'fastify' {
       authenticated: AuthRoute;
       user: AuthRoute;
     };
+  }
+
+  interface FastifyRequest {
+    user: UserType;
   }
 }
 

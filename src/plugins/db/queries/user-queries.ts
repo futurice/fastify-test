@@ -1,7 +1,7 @@
 import { sql } from 'slonik';
 import { select, SnakeToCamel } from '../utils';
 
-export class UserRow {
+class UserRow {
   id: number;
   uuid: string;
   name: string;
@@ -13,7 +13,7 @@ export type UserType = {
   [K in keyof UserRow as SnakeToCamel<K>]: UserRow[K];
 };
 
-export const findById = (uuid: string) => sql<UserRow>`
+export const findById = (uuid: string) => sql<UserType>`
   SELECT *
   FROM users
   WHERE uuid=${uuid}
