@@ -1,10 +1,10 @@
 import { FastifyPluginAsync } from 'fastify';
-import { Static } from '@sinclair/typebox';
-import { actionTypeResponseSchema } from './schemas';
+import { GetType } from 'purify-ts/Codec';
+import { ActionTypeResponse } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
   fastify.get<{
-    Reply: Static<typeof actionTypeResponseSchema>;
+    Reply: GetType<typeof ActionTypeResponse>;
   }>(
     '/',
     fastify.secureRoute.authenticated({
@@ -12,7 +12,7 @@ const routes: FastifyPluginAsync = async fastify => {
         description: 'Lists supported action types',
         tags: ['action-type'],
         response: {
-          200: actionTypeResponseSchema,
+          200: ActionTypeResponse.schema(),
         },
       },
     }),

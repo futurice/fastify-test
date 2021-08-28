@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Codec, string, boolean, enumeration } from 'purify-ts/Codec';
 
 export enum ActionType {
   IMAGE = 'IMAGE',
@@ -6,12 +6,12 @@ export enum ActionType {
   SIMA = 'SIMA',
 }
 
-export const createActionInputSchema = Type.Object({
-  imageData: Type.Optional(Type.String()),
-  text: Type.Optional(Type.String()),
-  type: Type.Enum(ActionType),
+export const CreateActionInput = Codec.interface({
+  imageData: string,
+  text: string,
+  type: enumeration(ActionType),
 });
 
-export const createActionResponseSchema = Type.Object({
-  success: Type.Boolean(),
+export const CreateActionResponse = Codec.interface({
+  success: boolean,
 });

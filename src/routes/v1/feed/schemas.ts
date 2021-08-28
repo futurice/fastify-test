@@ -1,14 +1,14 @@
-import { Type } from '@sinclair/typebox';
+import { Codec, enumeration, boolean } from 'purify-ts/Codec';
 
 export enum FeedSort {
   New,
   Hot,
 }
 
-export const feedResponseSchema = Type.Object({
-  ok: Type.Boolean(),
+export const FeedResponse = Codec.interface({
+  ok: boolean,
 });
 
-export const feedQuerySchema = Type.Object({
-  orderBy: Type.String(),
+export const FeedQuery = Codec.interface({
+  orderBy: enumeration(FeedSort),
 });

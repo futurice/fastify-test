@@ -5,7 +5,9 @@ import {
 } from 'fastify';
 import { preHandlerHookHandler } from 'fastify/types/hooks';
 import { get, set } from 'lodash/fp';
-import { TObject, TAny, Type, TProperties } from '@sinclair/typebox';
+import { NonEmptyList } from 'purify-ts';
+import { Codec, intersect } from 'purify-ts/Codec';
+import { NonEmptyString } from 'purify-ts-extra-codec';
 import fastifyPlugin from 'fastify-plugin';
 import { NotFoundError } from 'slonik';
 import fastifyAuth from 'fastify-auth';
@@ -15,12 +17,12 @@ interface ITokenPluginOpts {
   token: string;
 }
 
-const userHeaderSchema = Type.Object({
-  'x-user-uuid': Type.Readonly(Type.String()),
+const userHeaderSchema = Codec.interface({
+  'x-user-uuid': NonEmptyString,
 });
 
-const tokenHeaderSchema = Type.Object({
-  'x-api-token': Type.Readonly(Type.String()),
+const tokenHeaderSchema = Codec.interface({
+  'x-api-token': NonEmptyString,
 });
 
 type AuthRoute = (opts: RouteShorthandOptions) => RouteShorthandOptions;
@@ -29,8 +31,8 @@ const verifyToken = (
   instance: FastifyInstance,
   token: string,
 ): preHandlerHookHandler => (req, res, done) => {
-  const token = req.headers['x-api-token'];
-  if (token !== token) {
+  const tokenHeader = req.headers['x-api-token'];
+  if (tokenHeader !== token) {
     throw instance.httpErrors.unauthorized();
   }
 
@@ -63,18 +65,21 @@ const verifyUser = (instance: FastifyInstance): preHandlerHookHandler => async (
 
 const mergeOpts = (
   opts: RouteShorthandOptions,
-  securityHeaders: TObject<TProperties>[],
+  securityHeaders: Codec<any>[],
   authHook: preHandlerHookHandler,
 ): RouteShorthandOptions => {
   let mergedOpts = { ...opts };
 
   const headers =
-    (get(['schema', 'headers'], mergedOpts) as TObject<TAny>) ??
-    Type.Object({});
+    (get(['schema', 'headers'], mergedOpts) as Codec<unknown>) ??
+    Codec.interface({});
 
-  const mergedHeaders = Type.Intersect([headers, ...securityHeaders]);
+  const mergedHeaders = securityHeaders.reduce(
+    (acc, header) => intersect(acc, header),
+    headers,
+  );
 
-  mergedOpts = set(['schema', 'headers'], mergedHeaders, mergedOpts);
+  mergedOpts = set(['schema', 'headers'], mergedHeaders.schema(), mergedOpts);
 
   const prehandler = get(['preHandler'], mergedOpts) ?? [];
 

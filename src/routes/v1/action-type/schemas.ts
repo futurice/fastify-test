@@ -1,9 +1,9 @@
-import { Type } from '@sinclair/typebox';
+import { Codec, string, array, number } from 'purify-ts/Codec';
 
-export const actionTypeResponseSchema = Type.Array(
-  Type.Object({
-    code: Type.String(),
-    name: Type.String(),
-    cooldown: Type.Number(),
+export const ActionTypeResponse = array(
+  Codec.interface({
+    code: string,
+    name: string,
+    cooldown: number,
   }),
 );

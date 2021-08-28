@@ -1,11 +1,11 @@
 import { FastifyPluginAsync } from 'fastify';
-import { Static } from '@sinclair/typebox';
-import { feedResponseSchema, feedQuerySchema } from './schemas';
+import { GetType } from 'purify-ts/Codec';
+import { FeedResponse, FeedQuery } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
   fastify.get<{
-    Querystring: Static<typeof feedQuerySchema>;
-    Reply: Static<typeof feedResponseSchema>;
+    Querystring: GetType<typeof FeedQuery>;
+    Reply: GetType<typeof FeedResponse>;
   }>(
     '/',
     fastify.secureRoute.authenticated({
@@ -13,7 +13,7 @@ const routes: FastifyPluginAsync = async fastify => {
         description: 'Main feed content',
         tags: ['feed'],
         response: {
-          200: feedResponseSchema,
+          200: FeedResponse.schema(),
         },
       },
     }),

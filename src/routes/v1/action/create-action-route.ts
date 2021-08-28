@@ -1,11 +1,11 @@
 import { FastifyPluginAsync } from 'fastify';
-import { Static } from '@sinclair/typebox';
-import { createActionInputSchema, createActionResponseSchema } from './schemas';
+import { GetType } from 'purify-ts/Codec';
+import { CreateActionInput, CreateActionResponse } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
   fastify.post<{
-    Reply: Static<typeof createActionResponseSchema>;
-    Body: Static<typeof createActionInputSchema>;
+    Reply: GetType<typeof CreateActionResponse>;
+    Body: GetType<typeof CreateActionInput>;
   }>(
     '/',
     fastify.secureRoute.user({
@@ -13,9 +13,9 @@ const routes: FastifyPluginAsync = async fastify => {
         description: 'Create action',
         tags: ['action'],
         response: {
-          200: createActionResponseSchema,
+          200: CreateActionResponse.schema(),
         },
-        body: createActionResponseSchema,
+        body: CreateActionInput.schema(),
       },
     }),
     async (req, res) => {
