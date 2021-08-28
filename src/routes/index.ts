@@ -23,7 +23,7 @@ const routes: FastifyPluginAsync = async fastify => {
 
   fastify.register(autoload, {
     dir: path.join(__dirname),
-    indexPattern: /.*routes(\.ts|\.js|\.cjs|\.mjs)$/,
+    indexPattern: /.*route(\.ts|\.js|\.cjs|\.mjs)$/,
     // Ignore this file to avoid autoload
     // trying to re-register this plugin.
     ignorePattern: /index(\.ts|\.js|\.cjs|\.mjs)$/,

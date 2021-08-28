@@ -11,7 +11,7 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
   instance.decorateRequest('db', {});
   instance.decorateRequest('sql', {});
 
-  instance.addHook('preHandler', (req, _, next) => {
+  instance.addHook('onRequest', (req, _, next) => {
     req.db = createPool(config.DATABASE_URL, {
       interceptors: [transformNameInterceptors()],
     });

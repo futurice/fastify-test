@@ -27,10 +27,10 @@ type AuthRoute = (opts: RouteShorthandOptions) => RouteShorthandOptions;
 
 const verifyToken = (
   instance: FastifyInstance,
-  opts: ITokenPluginOpts,
+  token: string,
 ): preHandlerHookHandler => (req, res, done) => {
   const token = req.headers['x-api-token'];
-  if (token !== opts.token) {
+  if (token !== token) {
     throw instance.httpErrors.unauthorized();
   }
 
@@ -90,6 +90,7 @@ const mergeOpts = (
 
 const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
   async (instance, pluginOpts) => {
+    const { token } = pluginOpts;
     await instance.register(fastifyAuth);
     instance.decorateRequest('user', {});
 
@@ -98,18 +99,15 @@ const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
         mergeOpts(
           opts,
           [tokenHeaderSchema],
-          instance.auth([verifyToken(instance, pluginOpts)]),
+          instance.auth([verifyToken(instance, token)]),
         ),
       user: (opts: RouteShorthandOptions) =>
         mergeOpts(
           opts,
           [tokenHeaderSchema, userHeaderSchema],
-          instance.auth(
-            [verifyToken(instance, pluginOpts), verifyUser(instance)],
-            {
-              relation: 'and',
-            },
-          ),
+          instance.auth([verifyToken(instance, token), verifyUser(instance)], {
+            relation: 'and',
+          }),
         ),
     };
 

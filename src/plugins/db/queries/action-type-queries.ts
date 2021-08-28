@@ -17,7 +17,8 @@ export type ActionTypeType = {
   [K in keyof ActionTypeRow as SnakeToCamel<K>]: ActionTypeRow[K];
 };
 
-export const findAll = () => sql<ActionTypeType>`
+export const findAllUserActions = () => sql<ActionTypeType>`
   SELECT *
-  FROM action_type;
+  FROM action_type
+  WHERE is_user_action IS TRUE;
 `;

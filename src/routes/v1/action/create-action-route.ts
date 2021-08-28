@@ -12,7 +12,10 @@ const routes: FastifyPluginAsync = async fastify => {
       schema: {
         description: 'Create action',
         tags: ['action'],
-        response: {},
+        response: {
+          200: createActionResponseSchema,
+        },
+        body: createActionResponseSchema,
       },
     }),
     async (req, res) => {

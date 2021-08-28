@@ -17,7 +17,7 @@ const routes: FastifyPluginAsync = async fastify => {
       },
     }),
     async (req, res) => {
-      const result = await req.db.any(req.sql.actionType.findAll());
+      const result = await req.db.any(req.sql.actionType.findAllUserActions());
       const response = result.map(({ code, name, cooldown }) => ({
         code,
         name,
