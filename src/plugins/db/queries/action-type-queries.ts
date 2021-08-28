@@ -13,16 +13,11 @@ export class ActionTypeRow {
   is_user_action: boolean;
 }
 
-export type ActionType = {
+export type ActionTypeType = {
   [K in keyof ActionTypeRow as SnakeToCamel<K>]: ActionTypeRow[K];
 };
 
-type Column = keyof ActionTypeRow;
-const defaultColumns: Column[] = Object.keys(ActionTypeRow) as Column[];
-
-export const findAll = () => sql<ActionTypeRow>`
-  SELECT 
-    ${select(Object.keys(ActionTypeRow))}
-  FROM
-    action_type;
+export const findAll = () => sql<ActionTypeType>`
+  SELECT *
+  FROM action_type;
 `;

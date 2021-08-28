@@ -29,8 +29,8 @@ export const create = ({
   actionTypeCode,
   imagePath,
   text,
-}: CreateActionInput) => sql<ActionRow>`
+}: CreateActionInput) => sql<ActionType>`
   INSERT INTO action("user_id", "action_type_id", "image_path", "text")
   VALUES (${userId}, (SELECT id FROM action_type WHERE code = ${actionTypeCode}), ${imagePath}, ${text})
-  RETURNING ${select(Object.keys(ActionRow))};
+  RETURNING *;
 `;

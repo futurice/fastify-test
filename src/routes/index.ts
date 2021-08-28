@@ -2,8 +2,10 @@ import path from 'path';
 import { FastifyPluginAsync } from 'fastify';
 import autoload from 'fastify-autoload';
 import { docs } from '../plugins/docs';
+import { routePrinter } from '../plugins/route-printer';
 
 const routes: FastifyPluginAsync = async fastify => {
+  fastify.register(routePrinter);
   fastify.register(docs);
 
   fastify.ready(err => {

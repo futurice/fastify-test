@@ -7,17 +7,24 @@ const routes: FastifyPluginAsync = async fastify => {
     Reply: Static<typeof actionTypeResponseSchema>;
   }>(
     '/',
-    {
+
+    fastify.secureRoute.authenticated({
       schema: {
-        description: 'Supported action types',
+        description: 'Lists supported action types',
         tags: ['action-type'],
         response: {
           200: actionTypeResponseSchema,
         },
       },
-    },
-    (req, res) => {
-      res.status(200).send([]);
+    }),
+    async (req, res) => {
+      const result = await req.db.any(req.sql.actionType.findAll());
+      const response = result.map(({ code, name, cooldown }) => ({
+        code,
+        name,
+        cooldown,
+      }));
+      res.status(200).send(response);
     },
   );
 };

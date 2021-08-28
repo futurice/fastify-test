@@ -8,7 +8,7 @@ const routes: FastifyPluginAsync = async fastify => {
     Reply: Static<typeof feedResponseSchema>;
   }>(
     '/',
-    {
+    fastify.secureRoute.authenticated({
       schema: {
         description: 'Main feed content',
         tags: ['feed'],
@@ -16,7 +16,7 @@ const routes: FastifyPluginAsync = async fastify => {
           200: feedResponseSchema,
         },
       },
-    },
+    }),
     (req, res) => {
       res.status(200).send({
         ok: true,

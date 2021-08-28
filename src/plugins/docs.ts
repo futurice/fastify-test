@@ -1,10 +1,10 @@
-import { FastifyPluginAsync } from 'fastify';
+import { FastifyPluginCallback } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { fastifySwagger } from 'fastify-swagger';
 
-const plugin: FastifyPluginAsync = instance => {
+const plugin: FastifyPluginCallback = (instance, _, done) => {
   instance.register(fastifySwagger, {
-    routePrefix: '/docs',
+    routePrefix: '/api/docs',
     exposeRoute: true,
     swagger: {
       info: {
@@ -21,7 +21,7 @@ const plugin: FastifyPluginAsync = instance => {
     instance.swagger();
   });
 
-  return Promise.resolve();
+  done();
 };
 
 export const docs = fastifyPlugin(plugin);

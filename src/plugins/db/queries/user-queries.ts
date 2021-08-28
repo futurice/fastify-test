@@ -14,8 +14,7 @@ export type UserType = {
 };
 
 export const findById = (uuid: string) => sql<UserRow>`
-  SELECT
-    ${select(Object.keys(UserRow))} 
-  FROM
-    users WHERE uuid=${uuid}
+  SELECT *
+  FROM users
+  WHERE uuid=${uuid}
 `;

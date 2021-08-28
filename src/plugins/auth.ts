@@ -1,83 +1,111 @@
-import { FastifyPluginAsync, FastifyRequest, FastifyInstance } from 'fastify';
+import {
+  FastifyPluginAsync,
+  FastifyRequest,
+  FastifyInstance,
+  RouteShorthandOptions,
+} from 'fastify';
+import { preHandlerHookHandler } from 'fastify/types/hooks';
+import { get, set } from 'lodash/fp';
+import { TObject, TAny, Type, TProperties } from '@sinclair/typebox';
 import fastifyPlugin from 'fastify-plugin';
 import { NotFoundError } from 'slonik';
-import * as yup from 'yup';
+import fastifyAuth from 'fastify-auth';
 
 interface ITokenPluginOpts {
   token: string;
 }
 
-const userHeaderSchema = yup.object().shape({
-  'x-user-uuid': yup.string().uuid().required(),
+const userHeaderSchema = Type.Object({
+  'x-user-uuid': Type.Readonly(Type.String()),
 });
 
-type UserHeader = yup.Asserts<typeof userHeaderSchema>;
-
-const tokenHeaderSchema = yup.object().shape({
-  'x-api-token': yup.string().required(),
+const tokenHeaderSchema = Type.Object({
+  'x-api-token': Type.Readonly(Type.String()),
 });
 
-type TokenHeader = yup.Asserts<typeof tokenHeaderSchema>;
+type AuthRoute = (opts: RouteShorthandOptions) => RouteShorthandOptions;
 
-const validateSchema = <TResult>(schema: yup.AnySchema, obj: unknown) =>
-  schema.validate(obj).then(result => result as TResult);
-
-const validateUser = (instance: FastifyInstance) => (req: FastifyRequest) =>
-  validateSchema<UserHeader>(userHeaderSchema, req.headers)
-    .catch(err => {
-      if (err instanceof yup.ValidationError) {
-        throw instance.httpErrors.badRequest(err.errors.join(', '));
-      }
-      instance.log.warn('Unexpected validation error', err);
-
-      throw instance.httpErrors.internalServerError();
-    })
-    .then(result => {
-      return req.db
-        .one(req.sql.user.findById(result['x-user-uuid']))
-        .catch(err => {
-          if (err instanceof NotFoundError) {
-            throw instance.httpErrors.unauthorized();
-          }
-
-          throw instance.httpErrors.internalServerError();
-        });
-    });
-
-const validateToken = (instance: FastifyInstance, opts: ITokenPluginOpts) => (
+const verifyToken = (instance: FastifyInstance, opts: ITokenPluginOpts) => (
   req: FastifyRequest,
-) =>
-  validateSchema<TokenHeader>(tokenHeaderSchema, req.headers)
-    .catch(err => {
-      if (err instanceof yup.ValidationError) {
-        throw instance.httpErrors.unauthorized(err.errors.join(', '));
-      }
-      instance.log.warn('Unexpected validation error', err);
+) => {
+  const token = req.headers['x-api-token'];
+  if (token !== opts.token) {
+    throw instance.httpErrors.unauthorized();
+  }
+};
 
-      throw instance.httpErrors.internalServerError();
-    })
-    .then(result => {
-      if (result['x-api-token'] === opts.token) {
-        return;
-      }
+const verifyUser = (instance: FastifyInstance) => (req: FastifyRequest) => {
+  const userUuid = req.headers['x-user-uuid'];
 
-      throw instance.httpErrors.unauthorized('Incorrect api token ');
-    });
+  if (typeof userUuid !== 'string') {
+    throw instance.httpErrors.unauthorized();
+  }
+
+  const user = req.db.one(req.sql.user.findById(userUuid)).catch(err => {
+    throw instance.httpErrors.unauthorized();
+  });
+};
+
+const mergeOpts = (
+  opts: RouteShorthandOptions,
+  securityHeaders: TObject<TProperties>[],
+  authHook: preHandlerHookHandler,
+): RouteShorthandOptions => {
+  let mergedOpts = { ...opts };
+
+  const headers =
+    (get(['schema', 'headers'], mergedOpts) as TObject<TAny>) ??
+    Type.Object({});
+
+  const mergedHeaders = Type.Intersect([headers, ...securityHeaders]);
+
+  mergedOpts = set(['schema', 'headers'], mergedHeaders, mergedOpts);
+
+  const prehandler = get(['preHandler'], mergedOpts) ?? [];
+
+  if (Array.isArray(prehandler)) {
+    prehandler.unshift(authHook);
+    mergedOpts = set('preHandler', prehandler, mergedOpts);
+  } else {
+    mergedOpts = set('preHandler', [authHook, prehandler], mergedOpts);
+  }
+
+  return mergedOpts;
+};
 
 const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
-  async (instance, opts) => {
-    instance.decorate('auth', {
-      validateToken: validateToken(instance, opts),
-      validateUser: validateUser(instance),
-    });
+  async (instance, pluginOpts) => {
+    await instance.register(fastifyAuth);
+
+    const secureRoute: FastifyInstance['secureRoute'] = {
+      authenticated: (opts: RouteShorthandOptions) =>
+        mergeOpts(
+          opts,
+          [tokenHeaderSchema],
+          instance.auth([verifyToken(instance, pluginOpts)]),
+        ),
+      user: (opts: RouteShorthandOptions) =>
+        mergeOpts(
+          opts,
+          [tokenHeaderSchema, userHeaderSchema],
+          instance.auth(
+            [verifyToken(instance, pluginOpts), verifyUser(instance)],
+            {
+              relation: 'and',
+            },
+          ),
+        ),
+    };
+
+    instance.decorate('secureRoute', secureRoute);
   },
 );
 
 declare module 'fastify' {
   interface FastifyInstance {
-    auth: {
-      validateToken: ReturnType<typeof validateToken>;
-      validateUser: ReturnType<typeof validateUser>;
+    secureRoute: {
+      authenticated: AuthRoute;
+      user: AuthRoute;
     };
   }
 }
