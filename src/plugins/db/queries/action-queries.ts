@@ -1,7 +1,7 @@
 import { sql } from 'slonik';
 import { DateTime, SnakeToCamel, select } from '../utils';
 
-export class ActionRow {
+class ActionRow {
   id: number;
   user_id: number;
   action_type_id: number;

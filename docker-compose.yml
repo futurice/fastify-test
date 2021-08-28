@@ -10,11 +10,7 @@ services:
     volumes:
       - ./src:/app/server/src
       - ./tsconfig.json:/app/server/tsconfig.json
-    environment:
-      - PORT=8080
-      - DATABASE_URL=postgres://wappu:wappu@db:5432/wappudev
-      - NODE_ENV=development
-      - TOKEN
+    env_file: .env
     ports:
       - 8080:8080
     depends_on:

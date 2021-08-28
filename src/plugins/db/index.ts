@@ -4,6 +4,7 @@ import { createPool, DatabasePoolType } from 'slonik';
 import * as user from './queries/user-queries';
 import * as action from './queries/action-queries';
 import * as actionType from './queries/action-type-queries';
+import * as feedItem from './queries/feed-item-queries';
 import { transformNameInterceptors } from './utils';
 import config from '../../config';
 
@@ -19,6 +20,7 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
       user,
       action,
       actionType,
+      feedItem,
     };
     next();
   });
@@ -32,6 +34,7 @@ declare module 'fastify' {
       user: typeof user;
       action: typeof action;
       actionType: typeof actionType;
+      feedItem: typeof feedItem;
     };
   }
 }

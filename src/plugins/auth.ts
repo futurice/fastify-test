@@ -5,7 +5,6 @@ import {
 } from 'fastify';
 import { preHandlerHookHandler } from 'fastify/types/hooks';
 import { get, set } from 'lodash/fp';
-import { NonEmptyList } from 'purify-ts';
 import { Codec, intersect } from 'purify-ts/Codec';
 import { NonEmptyString } from 'purify-ts-extra-codec';
 import fastifyPlugin from 'fastify-plugin';
@@ -39,11 +38,9 @@ const verifyToken = (
   done();
 };
 
-const verifyUser = (instance: FastifyInstance): preHandlerHookHandler => async (
-  req,
-  res,
-  done,
-) => {
+const verifyUser = (
+  instance: FastifyInstance,
+): preHandlerHookHandler => async req => {
   const userUuid = req.headers['x-user-uuid'];
 
   if (typeof userUuid !== 'string') {
@@ -59,8 +56,6 @@ const verifyUser = (instance: FastifyInstance): preHandlerHookHandler => async (
   });
 
   req.user = user;
-
-  done();
 };
 
 const mergeOpts = (
@@ -89,7 +84,6 @@ const mergeOpts = (
   } else {
     mergedOpts = set('preHandler', [authHook, prehandler], mergedOpts);
   }
-
   return mergedOpts;
 };
 

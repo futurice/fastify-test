@@ -1,28 +1,26 @@
 import { Codec, string, GetType } from 'purify-ts';
 import { NumberFromString } from 'purify-ts-extra-codec';
 
-const configSchema = Codec.interface({
+const configCodec = Codec.interface({
   NODE_ENV: string,
   PORT: NumberFromString,
   DATABASE_URL: string,
   TOKEN: string,
 });
 
-export type Config = GetType<typeof configSchema>;
+export type Config = GetType<typeof configCodec>;
 
 let config!: Config;
 
 if (config === undefined) {
-  configSchema
+  config = configCodec
     .decode(process.env)
-    .ifRight(encoded => {
-      config = encoded;
-    })
     .ifLeft(err => {
       console.error(`Configuration validation failed: ${err}`);
       console.error('Shutting down the process...');
       process.exit(1);
-    });
+    })
+    .unsafeCoerce();
 }
 
 export default config;

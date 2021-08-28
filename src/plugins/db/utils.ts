@@ -5,18 +5,8 @@ import {
   QueryResultRowColumnType,
 } from 'slonik';
 
-const snakeCaseToCamelCase = (input: string) =>
-  input
-    .split('_')
-    .reduce(
-      (res, word, i) =>
-        i === 0
-          ? word.toLowerCase()
-          : `${res}${word.charAt(0).toUpperCase()}${word
-              .substr(1)
-              .toLowerCase()}`,
-      '',
-    );
+export const camelToSnakeCase = (str: string) =>
+  str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 
 export type DateTime = string;
 
