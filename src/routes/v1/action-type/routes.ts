@@ -7,7 +7,6 @@ const routes: FastifyPluginAsync = async fastify => {
     Reply: Static<typeof actionTypeResponseSchema>;
   }>(
     '/',
-
     fastify.secureRoute.authenticated({
       schema: {
         description: 'Lists supported action types',

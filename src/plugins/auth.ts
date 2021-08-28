@@ -10,7 +10,6 @@ import { TObject, TAny, Type, TProperties } from '@sinclair/typebox';
 import fastifyPlugin from 'fastify-plugin';
 import { NotFoundError } from 'slonik';
 import fastifyAuth from 'fastify-auth';
-
 interface ITokenPluginOpts {
   token: string;
 }
@@ -25,16 +24,23 @@ const tokenHeaderSchema = Type.Object({
 
 type AuthRoute = (opts: RouteShorthandOptions) => RouteShorthandOptions;
 
-const verifyToken = (instance: FastifyInstance, opts: ITokenPluginOpts) => (
-  req: FastifyRequest,
-) => {
+const verifyToken = (
+  instance: FastifyInstance,
+  opts: ITokenPluginOpts,
+): preHandlerHookHandler => (req, res, done) => {
   const token = req.headers['x-api-token'];
   if (token !== opts.token) {
     throw instance.httpErrors.unauthorized();
   }
+
+  done();
 };
 
-const verifyUser = (instance: FastifyInstance) => (req: FastifyRequest) => {
+const verifyUser = (instance: FastifyInstance): preHandlerHookHandler => (
+  req,
+  res,
+  done,
+) => {
   const userUuid = req.headers['x-user-uuid'];
 
   if (typeof userUuid !== 'string') {
@@ -42,8 +48,14 @@ const verifyUser = (instance: FastifyInstance) => (req: FastifyRequest) => {
   }
 
   const user = req.db.one(req.sql.user.findById(userUuid)).catch(err => {
-    throw instance.httpErrors.unauthorized();
+    if (err instanceof NotFoundError) {
+      throw instance.httpErrors.unauthorized();
+    }
+
+    throw instance.httpErrors.internalServerError();
   });
+
+  done();
 };
 
 const mergeOpts = (
