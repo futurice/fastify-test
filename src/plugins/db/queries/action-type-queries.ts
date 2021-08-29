@@ -1,6 +1,6 @@
 import { sql } from 'slonik';
 import { DateTime } from '../utils';
-import { SnakeToCamel, select } from '../utils';
+import { SnakeToCamel } from '../utils';
 
 class ActionTypeRow {
   id: number;

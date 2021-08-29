@@ -17,10 +17,16 @@ const routes: FastifyPluginAsync = async fastify => {
         },
       },
     }),
-    (req, res) => {
-      res.status(200).send({
-        ok: true,
-      });
+    async (req, res) => {
+      const result = await req.db.any(req.sql.feedItem.findAll());
+      const response = result.map(({ author, authorGuild, ...rest }) => ({
+        ...rest,
+        author: {
+          name: author,
+          guild: authorGuild,
+        },
+      }));
+      res.status(200).send(response);
     },
   );
 };

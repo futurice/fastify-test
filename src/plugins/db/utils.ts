@@ -8,7 +8,7 @@ import {
 export const camelToSnakeCase = (str: string) =>
   str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 
-export type DateTime = string;
+export type DateTime = Date;
 
 export type SnakeToCamel<S extends string> = S extends `${infer T}_${infer U}`
   ? `${T}${Capitalize<SnakeToCamel<U>>}`
