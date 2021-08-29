@@ -6,6 +6,7 @@ import {
   boolean,
   date,
   nullable,
+  enumeration,
 } from 'purify-ts/Codec';
 import { NumberRangedIn } from 'purify-ts-extra-codec';
 
@@ -34,4 +35,5 @@ export const FeedResponse = array(
 
 export const FeedQuery = Codec.interface({
   limit: optional(NumberRangedIn({ gte: 1, lte: 100 })),
+  orderBy: optional(enumeration(FeedSort)),
 });

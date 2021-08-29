@@ -1,4 +1,4 @@
-import { FastifyPluginCallback } from 'fastify';
+import { FastifyPluginCallback, FastifyInstance } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import {
   createPool,
@@ -21,7 +21,14 @@ import config from '../../config';
 
 const plugin: FastifyPluginCallback = (instance, _, done) => {
   instance.decorateRequest('db', {});
-  instance.decorateRequest('sql', {});
+
+  const sql: FastifyInstance['sql'] = {
+    user,
+    action,
+    actionType,
+    feedItem,
+  };
+  instance.decorate('sql', sql);
 
   instance.addHook('onRequest', (req, _, next) => {
     req.db = createPool(config.DATABASE_URL, {
@@ -35,12 +42,6 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
         createTimestampWithTimeZoneTypeParser(),
       ],
     });
-    req.sql = {
-      user,
-      action,
-      actionType,
-      feedItem,
-    };
     next();
   });
   done();
@@ -49,6 +50,9 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
 declare module 'fastify' {
   interface FastifyRequest {
     db: DatabasePoolType;
+  }
+
+  interface FastifyInstance {
     sql: {
       user: typeof user;
       action: typeof action;

@@ -47,13 +47,15 @@ const verifyUser = (
     throw instance.httpErrors.unauthorized();
   }
 
-  const user = await req.db.one(req.sql.user.findById(userUuid)).catch(err => {
-    if (err instanceof NotFoundError) {
-      throw instance.httpErrors.unauthorized();
-    }
+  const user = await req.db
+    .one(instance.sql.user.findById(userUuid))
+    .catch(err => {
+      if (err instanceof NotFoundError) {
+        throw instance.httpErrors.unauthorized();
+      }
 
-    throw instance.httpErrors.internalServerError();
-  });
+      throw instance.httpErrors.internalServerError();
+    });
 
   req.user = user;
 };

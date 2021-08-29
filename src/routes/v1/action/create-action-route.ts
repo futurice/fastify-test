@@ -21,11 +21,12 @@ const routes: FastifyPluginAsync = async fastify => {
     (req, res) => {
       return req.db.transaction(async trx => {
         // TODO Upload image, if IMAGE action.
+        const { action, feedItem } = fastify.sql;
         const { imageData, text, type } = req.body;
 
         return trx
           .one(
-            req.sql.action.create({
+            action.create({
               userId: 1,
               imagePath: imageData ?? null,
               text: text ?? null,
@@ -37,7 +38,7 @@ const routes: FastifyPluginAsync = async fastify => {
               case ActionType.IMAGE:
               case ActionType.TEXT:
                 return trx.one(
-                  req.sql.feedItem.create({
+                  feedItem.create({
                     type,
                     actionId: action.id,
                     text,
