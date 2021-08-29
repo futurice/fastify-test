@@ -27,32 +27,23 @@ const routes: FastifyPluginAsync = async fastify => {
         return trx
           .one(
             action.create({
-              userId: 1,
+              userId: req.user.id,
               imagePath: imageData ?? null,
               text: text ?? null,
               actionTypeCode: type,
             }),
           )
           .then(action => {
-            switch (type) {
-              case ActionType.IMAGE:
-              case ActionType.TEXT:
-                return trx.one(
-                  feedItem.create({
-                    type,
-                    actionId: action.id,
-                    text,
-                    userId: req.user.id,
-                    // imagePath,
-                  }),
-                );
-              case ActionType.SIMA:
-                // Above actions do not generate
-                // feed items on creation.
-                return;
-              default:
-                req.log.error('Un-implemented action type handler');
-                throw fastify.httpErrors.internalServerError();
+            if (type === ActionType.IMAGE || type === ActionType.TEXT) {
+              return trx.one(
+                feedItem.create({
+                  type,
+                  actionId: action.id,
+                  text,
+                  userId: req.user.id,
+                  // imagePath,
+                }),
+              );
             }
           })
           .then(() => {
