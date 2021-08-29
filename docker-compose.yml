@@ -1,0 +1,66 @@
+# This docker compose file is intended for setting up an environment for local
+# development
+version: '3.8'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+      target: microservice
+    volumes:
+      - ./src:/app/server/src
+      - ./tsconfig.json:/app/server/tsconfig.json
+    env_file: .env
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+      - migrations
+    networks:
+      - wappu-backend
+
+  migrations:
+    image: flyway/flyway:7-alpine
+    command: migrate
+    volumes:
+      - ./migrations:/flyway/sql/migrations
+      - ./seeds:/flyway/sql/seeds
+    environment:
+      FLYWAY_URL: jdbc:postgresql://db:5432/wappudev
+      FLYWAY_USER: wappu
+      FLYWAY_PASSWORD: wappu
+    healthcheck: # Used for waiting the db to be up and running
+      test: ['CMD', 'flyway validate']
+      interval: 2s
+      timeout: 5s
+      retries: 20
+    networks:
+      - wappu-backend
+    depends_on:
+      - db
+
+  db:
+    image: postgres:11
+    environment:
+      - POSTGRES_USER=wappu
+      - POSTGRES_PASSWORD=wappu
+      - POSTGRES_DB=wappudev
+    networks:
+      - wappu-backend
+    volumes:
+      - pgdata:/var/lib/wappums/postgresql/data
+    ports:
+      - 5432:5432
+    healthcheck: # Used for waiting the db to be up and running
+      test: ['CMD-SHELL', 'pg_isready --dbname=wappudev --username=wappu']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+networks:
+  wappu-backend:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local

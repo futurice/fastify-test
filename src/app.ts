@@ -1,27 +1,17 @@
 import fastify, { FastifyInstance, FastifyServerOptions } from 'fastify';
-import fastifyPlugin from 'fastify-plugin';
 import gracefulShutdown from 'fastify-graceful-shutdown';
-import { docs } from './docs';
-import { validator } from './plugins/basicAuth';
+import sensible from 'fastify-sensible';
+import authPlugin from './plugins/auth';
+import db from './plugins/db';
 import routes from './routes';
+import config from './config';
 
 export function build(opts: FastifyServerOptions): FastifyInstance {
   const app = fastify(opts);
   app.register(gracefulShutdown);
-  app.register(fastifyPlugin(docs));
-  app.register(fastifyPlugin(validator));
+  app.register(sensible);
+  app.register(db);
+  app.register(authPlugin, { token: config.TOKEN });
   app.register(routes);
-
-  app.ready(err => {
-    if (err) throw err;
-    // Builds docs
-    app.swagger();
-  });
-
-  app.addHook('onClose', (instance, done) => {
-    // Release resources
-    done();
-  });
-
   return app;
 }
