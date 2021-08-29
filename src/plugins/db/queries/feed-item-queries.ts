@@ -49,7 +49,7 @@ type FindFeedItemType = FeedItemType & {
   authorGuild: string;
 };
 
-export const findAll = () => {
+export const findAll = (limit: number) => {
   return sql<FindFeedItemType>`
     SELECT
       feed_item.*,
@@ -57,6 +57,7 @@ export const findAll = () => {
       guild.name AS author_guild
     FROM feed_item
     LEFT JOIN users ON feed_item.user_id = users.id
-    LEFT JOIN guild ON users.team_id = guild.id;
+    LEFT JOIN guild ON users.team_id = guild.id
+    LIMIT ${limit};
   `;
 };

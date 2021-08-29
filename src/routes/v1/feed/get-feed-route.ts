@@ -12,13 +12,15 @@ const routes: FastifyPluginAsync = async fastify => {
       schema: {
         description: 'Main feed content',
         tags: ['feed'],
+        querystring: FeedQuery.schema(),
         response: {
           200: FeedResponse.schema(),
         },
       },
     }),
     async (req, res) => {
-      const result = await req.db.any(req.sql.feedItem.findAll());
+      const limit = req.query.limit ?? 50;
+      const result = await req.db.any(req.sql.feedItem.findAll(limit));
       const response = result.map(({ author, authorGuild, ...rest }) => ({
         ...rest,
         author: {

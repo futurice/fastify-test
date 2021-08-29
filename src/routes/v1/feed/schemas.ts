@@ -1,16 +1,19 @@
 import {
   Codec,
-  enumeration,
+  optional,
   array,
   string,
   boolean,
   date,
   nullable,
 } from 'purify-ts/Codec';
+import { NumberRangedIn } from 'purify-ts-extra-codec';
+import { withDefault } from '../../../codec/utils';
+import { Right } from 'purify-ts';
 
 export enum FeedSort {
-  New,
-  Hot,
+  New = 'NEW',
+  Hot = 'HOT',
 }
 
 export const FeedResponse = array(
@@ -32,5 +35,5 @@ export const FeedResponse = array(
 );
 
 export const FeedQuery = Codec.interface({
-  orderBy: enumeration(FeedSort),
+  limit: optional(NumberRangedIn({ gte: 1, lte: 100 })),
 });
