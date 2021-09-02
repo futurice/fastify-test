@@ -38,7 +38,14 @@ export const canDoAction: (
     });
 };
 
-export const markActionDone = async (instance: FastifyInstance) => {
+type MarkActionTypeType = (
+  uuid: string,
+  action: ActionType,
+) => EitherAsync<unknown, boolean>;
+
+export const markActionDone = async (
+  instance: FastifyInstance,
+): Promise<MarkActionTypeType> => {
   const cache = await EitherAsync(() => {
     const query = instance.sql.actionType.findAllUserActions();
     return instance.db.any(query);
@@ -56,7 +63,7 @@ export const markActionDone = async (instance: FastifyInstance) => {
       },
     });
 
-  return async (uuid: string, action: ActionType) => {
+  return (uuid, action) => {
     const redisQuery = instance.redis.set(
       key(uuid, action),
       '', // Actual value does not matter
@@ -79,7 +86,7 @@ const plugin: FastifyPluginAsync = async instance => {
 declare module 'fastify' {
   interface FastifyInstance {
     throttle: {
-      markActionDone: ReturnType<typeof markActionDone>;
+      markActionDone: MarkActionTypeType;
       canDoAction: ReturnType<typeof canDoAction>;
     };
   }
