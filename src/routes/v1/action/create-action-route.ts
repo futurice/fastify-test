@@ -9,6 +9,7 @@ const routes: FastifyPluginAsync = async fastify => {
   }>(
     '/',
     fastify.secureRoute.user({
+      preHandler: fastify.throttle.canDoAction,
       schema: {
         description: 'Create action',
         tags: ['action'],
@@ -19,7 +20,7 @@ const routes: FastifyPluginAsync = async fastify => {
       },
     }),
     (req, res) => {
-      return req.db.transaction(async trx => {
+      return fastify.db.transaction(async trx => {
         // TODO Upload image, if IMAGE action.
         const { action, feedItem } = fastify.sql;
         const { imageData, text, type } = req.body;
@@ -45,6 +46,9 @@ const routes: FastifyPluginAsync = async fastify => {
                 }),
               );
             }
+          })
+          .then(() => {
+            return fastify.throttle.markActionDone(req.user.uuid, type);
           })
           .then(() => {
             return res.status(200).send({

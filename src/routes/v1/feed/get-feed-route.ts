@@ -21,7 +21,7 @@ const routes: FastifyPluginAsync = async fastify => {
     async (req, res) => {
       const limit = req.query.limit ?? 50;
       const { feedItem } = fastify.sql;
-      const result = await req.db.any(feedItem.findAll(limit));
+      const result = await fastify.db.any(feedItem.findAll(limit));
       const response = result.map(({ author, authorGuild, ...rest }) => ({
         ...rest,
         author: {
