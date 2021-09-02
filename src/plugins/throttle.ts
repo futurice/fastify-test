@@ -1,13 +1,15 @@
 import {
-  FastifyPluginCallback,
   preHandlerAsyncHookHandler,
   FastifyInstance,
+  FastifyPluginAsync,
 } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { EitherAsync } from 'purify-ts';
 import { ActionType, CreateActionInput } from '../routes/v1/action/schemas';
 
 const key = (uuid: string, action: ActionType) => `${uuid}:${action}`;
+
+type CooldownCache = Record<ActionType, number>;
 
 export const canDoAction: (
   instance: FastifyInstance,
@@ -36,22 +38,42 @@ export const canDoAction: (
     });
 };
 
-export const markActionDone = (instance: FastifyInstance) => async (
-  uuid: string,
-  action: ActionType,
-) => {
-  const redisQuery = instance.redis.set(key(uuid, action), '');
-  return EitherAsync(() => redisQuery).map(result => result === 'OK');
+export const markActionDone = async (instance: FastifyInstance) => {
+  const cache = await EitherAsync(() => {
+    const query = instance.sql.actionType.findAllUserActions();
+    return instance.db.any(query);
+  })
+    .map(actionTypes =>
+      actionTypes.reduce((acc, actionType) => {
+        acc[actionType.code as ActionType] = actionType.cooldown;
+        return acc;
+      }, {} as CooldownCache),
+    )
+    .caseOf({
+      Right: result => result,
+      Left: err => {
+        throw new Error(`Failed to load action types in-memory: ${err}`);
+      },
+    });
+
+  return async (uuid: string, action: ActionType) => {
+    const redisQuery = instance.redis.set(
+      key(uuid, action),
+      '', // Actual value does not matter
+      'PX', // MS
+      cache[action],
+    );
+    return EitherAsync(() => redisQuery).map(result => result === 'OK');
+  };
 };
 
-const plugin: FastifyPluginCallback = (instance, _, done) => {
+const plugin: FastifyPluginAsync = async instance => {
   const throttle = {
-    markActionDone: markActionDone(instance),
+    markActionDone: await markActionDone(instance),
     canDoAction: canDoAction(instance),
   };
 
   instance.decorate('throttle', throttle);
-  done();
 };
 
 declare module 'fastify' {
