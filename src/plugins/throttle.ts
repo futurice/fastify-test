@@ -5,7 +5,10 @@ import {
 } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { EitherAsync } from 'purify-ts';
-import { ActionType, CreateActionInput } from '../routes/v1/action/schemas';
+import {
+  ActionType,
+  CreateActionInput,
+} from '../routes/endpoints/v1/action/schemas';
 
 const key = (uuid: string, action: ActionType) => `${uuid}:${action}`;
 
