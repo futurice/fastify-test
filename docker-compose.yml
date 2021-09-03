@@ -16,6 +16,7 @@ services:
     depends_on:
       - db
       - migrations
+      - redis
     networks:
       - wappu-backend
 
@@ -57,10 +58,21 @@ services:
       timeout: 5s
       retries: 20
 
+  redis:
+    image: redis:6.2.5
+    networks:
+      - wappu-backend
+    volumes:
+      - redisdata:/var/lib/wappu-backend/redis/data
+    ports:
+      - 6379:6379
+
 networks:
   wappu-backend:
     driver: bridge
 
 volumes:
   pgdata:
+    driver: local
+  redisdata:
     driver: local

@@ -47,7 +47,7 @@ const verifyUser = (
     throw instance.httpErrors.unauthorized();
   }
 
-  const user = await req.db
+  const user = await instance.db
     .one(instance.sql.user.findById(userUuid))
     .catch(err => {
       if (err instanceof NotFoundError) {

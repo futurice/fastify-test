@@ -1,4 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
+import { EitherAsync } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
 import { ActionTypeResponse } from './schemas';
 
@@ -18,8 +19,15 @@ const routes: FastifyPluginAsync = async fastify => {
     }),
     async (req, res) => {
       const { actionType } = fastify.sql;
-      const result = await req.db.any(actionType.findAllUserActions());
-      res.status(200).send(result.slice());
+      return EitherAsync(() =>
+        fastify.db.any(actionType.findAllUserActions()),
+      ).caseOf({
+        Left: err => {
+          req.log.error(`Error getting action types: ${err}`);
+          throw fastify.httpErrors.internalServerError();
+        },
+        Right: result => res.status(200).send(result.slice()),
+      });
     },
   );
 };

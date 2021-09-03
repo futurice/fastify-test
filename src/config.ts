@@ -6,6 +6,7 @@ const configCodec = Codec.interface({
   PORT: NumberFromString,
   DATABASE_URL: string,
   TOKEN: string,
+  REDIS_URL: string,
 });
 
 export type Config = GetType<typeof configCodec>;
@@ -13,14 +14,14 @@ export type Config = GetType<typeof configCodec>;
 let config!: Config;
 
 if (config === undefined) {
-  config = configCodec
-    .decode(process.env)
-    .ifLeft(err => {
+  config = configCodec.decode(process.env).caseOf({
+    Right: result => result,
+    Left: err => {
       console.error(`Configuration validation failed: ${err}`);
       console.error('Shutting down the process...');
       process.exit(1);
-    })
-    .unsafeCoerce();
+    },
+  });
 }
 
 export default config;

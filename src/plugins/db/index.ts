@@ -20,7 +20,18 @@ import { transformNameInterceptors } from './utils';
 import config from '../../config';
 
 const plugin: FastifyPluginCallback = (instance, _, done) => {
-  instance.decorateRequest('db', {});
+  const pool = createPool(config.DATABASE_URL, {
+    interceptors: [transformNameInterceptors()],
+    typeParsers: [
+      createBigintTypeParser(),
+      createDateTypeParser(),
+      createIntervalTypeParser(),
+      createNumericTypeParser(),
+      createTimestampTypeParser(),
+      createTimestampWithTimeZoneTypeParser(),
+    ],
+  });
+  instance.decorate('db', pool);
 
   const sql: FastifyInstance['sql'] = {
     user,
@@ -30,29 +41,12 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
   };
   instance.decorate('sql', sql);
 
-  instance.addHook('onRequest', (req, _, next) => {
-    req.db = createPool(config.DATABASE_URL, {
-      interceptors: [transformNameInterceptors()],
-      typeParsers: [
-        createBigintTypeParser(),
-        createDateTypeParser(),
-        createIntervalTypeParser(),
-        createNumericTypeParser(),
-        createTimestampTypeParser(),
-        createTimestampWithTimeZoneTypeParser(),
-      ],
-    });
-    next();
-  });
   done();
 };
 
 declare module 'fastify' {
-  interface FastifyRequest {
-    db: DatabasePoolType;
-  }
-
   interface FastifyInstance {
+    db: DatabasePoolType;
     sql: {
       user: typeof user;
       action: typeof action;
