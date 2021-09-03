@@ -1,4 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
+import { EitherAsync } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
 import { FeedResponse, FeedQuery } from './schemas';
 
@@ -21,15 +22,26 @@ const routes: FastifyPluginAsync = async fastify => {
     async (req, res) => {
       const limit = req.query.limit ?? 50;
       const { feedItem } = fastify.sql;
-      const result = await fastify.db.any(feedItem.findAll(limit));
-      const response = result.map(({ author, authorGuild, ...rest }) => ({
-        ...rest,
-        author: {
-          name: author,
-          guild: authorGuild,
-        },
-      }));
-      res.status(200).send(response);
+
+      return EitherAsync(() => fastify.db.any(feedItem.findAll(limit)))
+        .map(result =>
+          result.map(({ author, authorGuild, ...rest }) => ({
+            ...rest,
+            author: {
+              name: author,
+              guild: authorGuild,
+            },
+          })),
+        )
+        .caseOf({
+          Left: err => {
+            req.log.error(`Error getting feed: ${err}`);
+            throw fastify.httpErrors.internalServerError();
+          },
+          Right: response => {
+            return res.status(200).send(response);
+          },
+        });
     },
   );
 };

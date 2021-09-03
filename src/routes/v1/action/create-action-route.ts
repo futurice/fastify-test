@@ -1,5 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
+import { EitherAsync, Right } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
+import { ActionType as ActionRowType } from '../../../plugins/db/queries/action-queries';
 import { CreateActionInput, CreateActionResponse, ActionType } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
@@ -25,18 +27,22 @@ const routes: FastifyPluginAsync = async fastify => {
         const { action, feedItem } = fastify.sql;
         const { imageData, text, type } = req.body;
 
-        return trx
-          .one(
+        const createAction = EitherAsync(() =>
+          trx.one(
             action.create({
               userId: req.user.id,
               imagePath: imageData ?? null,
               text: text ?? null,
               actionTypeCode: type,
             }),
-          )
-          .then(action => {
+          ),
+        );
+
+        // Generates a feeditem, if action type should result in one.
+        const generateFeedItem = (action: ActionRowType) =>
+          EitherAsync(async () => {
             if (type === ActionType.IMAGE || type === ActionType.TEXT) {
-              return trx.one(
+              await trx.one(
                 feedItem.create({
                   type,
                   actionId: action.id,
@@ -46,14 +52,27 @@ const routes: FastifyPluginAsync = async fastify => {
                 }),
               );
             }
-          })
-          .then(() => {
-            return fastify.throttle.markActionDone(req.user.uuid, type);
-          })
-          .then(() => {
-            return res.status(200).send({
-              success: true,
-            });
+            return action;
+          });
+
+        const markDone = () =>
+          EitherAsync(() =>
+            fastify.throttle.markActionDone(req.user.uuid, type),
+          );
+
+        return await createAction
+          .chain(generateFeedItem)
+          .chain(markDone)
+          .caseOf({
+            Left: err => {
+              req.log.error(`Error creating action: ${err}`);
+              throw fastify.httpErrors.internalServerError();
+            },
+            Right: () => {
+              return res.status(200).send({
+                success: true,
+              });
+            },
           });
       });
     },
