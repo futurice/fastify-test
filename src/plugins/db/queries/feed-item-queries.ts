@@ -35,7 +35,9 @@ export const create = (input: CreateFeedItemInput) => {
     .map(key => camelToSnakeCase(key))
     .map(column => sql.identifier([column]));
 
-  const values = Object.values(input);
+  const values = Object.values(input).map(value =>
+    value !== undefined ? value : null,
+  );
 
   return sql<FeedItemType>`
     INSERT INTO feed_item(${sql.join(columns, sql`, `)})
