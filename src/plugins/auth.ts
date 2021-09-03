@@ -93,7 +93,7 @@ const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
   async (instance, pluginOpts) => {
     const { token } = pluginOpts;
     await instance.register(fastifyAuth);
-    instance.decorateRequest('user', {});
+    instance.decorateRequest('user', { getter: () => ({}) });
 
     const secureRoute: FastifyInstance['secureRoute'] = {
       authenticated: (opts: RouteShorthandOptions) =>

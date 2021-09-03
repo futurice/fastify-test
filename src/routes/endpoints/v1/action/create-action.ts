@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
-import { EitherAsync, Right } from 'purify-ts';
+import { EitherAsync } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
-import { ActionType as ActionRowType } from '../../../plugins/db/queries/action-queries';
+import { ActionType as ActionRowType } from '../../../../plugins/db/queries/action-queries';
 import { CreateActionInput, CreateActionResponse, ActionType } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
