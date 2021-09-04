@@ -49,6 +49,7 @@ export const create = (input: CreateFeedItemInput) => {
 type FindFeedItemType = FeedItemType & {
   author: string;
   authorGuild: string;
+  commentCount: number;
 };
 
 export const findAll = (limit: number) => {
@@ -56,10 +57,16 @@ export const findAll = (limit: number) => {
     SELECT
       feed_item.*,
       users.name AS author,
-      guild.name AS author_guild
+      guild.name AS author_guild,
+      COUNT(comment.id) AS comment_count
     FROM feed_item
     LEFT JOIN users ON feed_item.user_id = users.id
     LEFT JOIN guild ON users.team_id = guild.id
+    LEFT JOIN comment ON feed_item.id = comment.feed_item_id
+    GROUP BY
+      feed_item.id,
+      users.name,
+      guild.name
     LIMIT ${limit};
   `;
 };

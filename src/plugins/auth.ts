@@ -11,6 +11,7 @@ import fastifyPlugin from 'fastify-plugin';
 import { NotFoundError } from 'slonik';
 import fastifyAuth from 'fastify-auth';
 import { UserType } from '../plugins/db/queries/user-queries';
+import { Right, Left, EitherAsync } from 'purify-ts';
 
 interface ITokenPluginOpts {
   token: string;
@@ -93,7 +94,7 @@ const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
   async (instance, pluginOpts) => {
     const { token } = pluginOpts;
     await instance.register(fastifyAuth);
-    instance.decorateRequest('user', { getter: () => ({}) });
+    instance.decorateRequest('user', {});
 
     const secureRoute: FastifyInstance['secureRoute'] = {
       authenticated: (opts: RouteShorthandOptions) =>
