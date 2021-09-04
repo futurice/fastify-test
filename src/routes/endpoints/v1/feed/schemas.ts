@@ -12,6 +12,7 @@ import {
   NumberRangedIn,
   NonEmptyString,
   StringLengthRangedIn,
+  Integer,
 } from 'purify-ts-extra-codec';
 
 export enum FeedSort {
@@ -28,6 +29,7 @@ export const FeedResponse = array(
     isSticky: boolean,
     createdAt: date,
     updatedAt: date,
+    commentCount: Integer,
     author: nullable(
       Codec.interface({
         name: string,
