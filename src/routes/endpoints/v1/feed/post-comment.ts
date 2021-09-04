@@ -29,7 +29,6 @@ const routes: FastifyPluginAsync = async fastify => {
     async (req, res) => {
       const { feedItemUuid } = req.params;
       const { comment } = fastify.sql;
-      console.log(req.user);
 
       return await EitherAsync(() =>
         fastify.db.one(
