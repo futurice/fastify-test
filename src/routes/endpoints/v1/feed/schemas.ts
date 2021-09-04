@@ -8,7 +8,11 @@ import {
   nullable,
   enumeration,
 } from 'purify-ts/Codec';
-import { NumberRangedIn } from 'purify-ts-extra-codec';
+import {
+  NumberRangedIn,
+  NonEmptyString,
+  StringLengthRangedIn,
+} from 'purify-ts-extra-codec';
 
 export enum FeedSort {
   New = 'NEW',
@@ -36,4 +40,16 @@ export const FeedResponse = array(
 export const FeedQuery = Codec.interface({
   limit: optional(NumberRangedIn({ gte: 1, lte: 100 })),
   orderBy: optional(enumeration(FeedSort)),
+});
+
+export const CreateCommentParams = Codec.interface({
+  feedItemUuid: NonEmptyString,
+});
+
+export const CreateCommentInput = Codec.interface({
+  text: StringLengthRangedIn({ gt: 0, lte: 1000 }),
+});
+
+export const CreateCommentResponse = Codec.interface({
+  uuid: NonEmptyString,
 });

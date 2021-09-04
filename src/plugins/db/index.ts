@@ -16,6 +16,7 @@ import * as user from './queries/user-queries';
 import * as action from './queries/action-queries';
 import * as actionType from './queries/action-type-queries';
 import * as feedItem from './queries/feed-item-queries';
+import * as comment from './queries/comment-queries';
 import { transformNameInterceptors } from './utils';
 import config from '../../config';
 
@@ -38,6 +39,7 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
     action,
     actionType,
     feedItem,
+    comment,
   };
   instance.decorate('sql', sql);
 
@@ -52,6 +54,7 @@ declare module 'fastify' {
       action: typeof action;
       actionType: typeof actionType;
       feedItem: typeof feedItem;
+      comment: typeof comment;
     };
   }
 }

@@ -68,11 +68,10 @@ const routes: FastifyPluginAsync = async fastify => {
               req.log.error(`Error creating action: ${err}`);
               throw fastify.httpErrors.internalServerError();
             },
-            Right: () => {
-              return res.status(200).send({
+            Right: () =>
+              res.status(200).send({
                 success: true,
-              });
-            },
+              }),
           });
       });
     },
