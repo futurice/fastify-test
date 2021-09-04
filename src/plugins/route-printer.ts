@@ -15,9 +15,9 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
     }
   });
 
-  instance.addHook('onReady', done => {
+  instance.addHook('onReady', printdone => {
     instance.log.info(`Routes:\n${routes.join('\n')}`);
-    done();
+    printdone();
   });
 
   done();

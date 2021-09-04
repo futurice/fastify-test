@@ -11,7 +11,6 @@ import fastifyPlugin from 'fastify-plugin';
 import { NotFoundError } from 'slonik';
 import fastifyAuth from 'fastify-auth';
 import { UserType } from '../plugins/db/queries/user-queries';
-import { Right, Left, EitherAsync } from 'purify-ts';
 
 interface ITokenPluginOpts {
   token: string;

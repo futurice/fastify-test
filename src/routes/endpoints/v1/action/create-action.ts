@@ -39,20 +39,20 @@ const routes: FastifyPluginAsync = async fastify => {
         );
 
         // Generates a feeditem, if action type should result in one.
-        const generateFeedItem = (action: ActionRowType) =>
+        const generateFeedItem = (newAction: ActionRowType) =>
           EitherAsync(async () => {
             if (type === ActionType.IMAGE || type === ActionType.TEXT) {
               await trx.one(
                 feedItem.create({
                   type,
-                  actionId: action.id,
+                  actionId: newAction.id,
                   text,
                   userId: req.user.id,
                   // imagePath,
                 }),
               );
             }
-            return action;
+            return newAction;
           });
 
         const markDone = () =>
