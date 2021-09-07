@@ -23,25 +23,15 @@ const routes: FastifyPluginAsync = async fastify => {
       const limit = req.query.limit ?? 50;
       const { feedItem } = fastify.sql;
 
-      return EitherAsync(() => fastify.db.any(feedItem.findAll(limit)))
-        .map(result =>
-          result.map(({ author, authorGuild, ...rest }) => ({
-            ...rest,
-            author: {
-              name: author,
-              guild: authorGuild,
-            },
-          })),
-        )
-        .caseOf({
-          Left: err => {
-            req.log.error(`Error getting feed: ${err}`);
-            throw fastify.httpErrors.internalServerError();
-          },
-          Right: response => {
-            return res.status(200).send(response);
-          },
-        });
+      return EitherAsync(() => fastify.db.any(feedItem.findAll(limit))).caseOf({
+        Left: err => {
+          req.log.error(`Error getting feed: ${err}`);
+          throw fastify.httpErrors.internalServerError();
+        },
+        Right: response => {
+          return res.status(200).send(response.slice());
+        },
+      });
     },
   );
 };

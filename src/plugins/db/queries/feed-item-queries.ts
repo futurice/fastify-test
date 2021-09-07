@@ -47,9 +47,11 @@ export const create = (input: CreateFeedItemInput) => {
 };
 
 type FindFeedItemType = FeedItemType & {
-  author: string;
-  authorGuild: string;
   commentCount: number;
+  author: {
+    name: string;
+    guild: string;
+  };
 };
 
 export const findAll = (limit: number) => {
@@ -58,7 +60,11 @@ export const findAll = (limit: number) => {
       feed_item.*,
       users.name AS author,
       guild.name AS author_guild,
-      COUNT(comment.id) AS comment_count
+      COUNT(comment.id) AS comment_count,
+      json_build_object(
+        'name', users.name,
+        'guild', guild.name
+      ) as author
     FROM feed_item
     LEFT JOIN users ON feed_item.user_id = users.id
     LEFT JOIN guild ON users.team_id = guild.id
