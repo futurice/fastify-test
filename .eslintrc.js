@@ -12,7 +12,6 @@ module.exports = {
   ],
   ignorePatterns: ["**/generated/*"],
   rules: {
-    'no-shadow': 'error',
     '@typescript-eslint/no-use-before-define': [
       'error',
       { functions: false, classes: true, variables: true },
