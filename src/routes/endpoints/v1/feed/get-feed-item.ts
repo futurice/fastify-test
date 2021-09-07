@@ -12,7 +12,7 @@ const routes: FastifyPluginAsync = async fastify => {
     fastify.secureRoute.authenticated({
       schema: {
         params: GetFeedItemParams.schema(),
-        description: 'Get feed item',
+        description: 'A single feed item and related comments',
         tags: ['feed'],
         response: {
           200: FeedOneResponse.schema(),
