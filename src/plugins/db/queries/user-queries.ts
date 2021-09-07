@@ -1,5 +1,5 @@
 import { sql } from 'slonik';
-import { select, SnakeToCamel } from '../utils';
+import { SnakeToCamel } from '../utils';
 
 class UserRow {
   id: number;
