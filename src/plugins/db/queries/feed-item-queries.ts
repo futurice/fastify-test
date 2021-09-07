@@ -70,3 +70,63 @@ export const findAll = (limit: number) => {
     LIMIT ${limit};
   `;
 };
+
+type FindOneFeedItemType = FeedItemType & {
+  author: {
+    name: string;
+    guild: string;
+  };
+  comments: {
+    uuid: string;
+    text: string;
+    author: {
+      name: string;
+      guild: string;
+    };
+    createdAt: string;
+  }[];
+};
+
+export const findOne = (uuid: string) => {
+  return sql<FindOneFeedItemType>`
+    WITH comment_cte AS (
+      SELECT
+        comment.uuid,
+        comment.text,
+        comment.feed_item_id,
+        json_build_object(
+          'name', users.name,
+          'guild', guild.name
+        ) as author,
+        comment.created_at
+      FROM comment
+      LEFT JOIN feed_item ON feed_item.id = comment.feed_item_id
+      LEFT JOIN users ON users.id = comment.user_id
+      LEFT JOIN guild ON guild.id = users.team_id
+      WHERE feed_item.uuid = ${uuid}
+    )
+    SELECT
+      feed_item.*,
+      json_build_object(
+        'name', users.name,
+        'guild', guild.name
+      ) as author,
+      json_agg(
+        json_build_object(
+          'uuid', comment_cte.uuid,
+          'text', comment_cte.text,
+          'author', comment_cte.author,
+          'createdAt', comment_cte.created_at
+        )
+      ) as comments
+    FROM feed_item
+    LEFT JOIN users ON feed_item.user_id = users.id
+    LEFT JOIN guild ON users.team_id = guild.id
+    LEFT JOIN comment_cte ON comment_cte.feed_item_id = feed_item.id
+    WHERE feed_item.uuid = ${uuid}
+    GROUP BY
+      feed_item.id,
+      users.name,
+      guild.name
+  `;
+};

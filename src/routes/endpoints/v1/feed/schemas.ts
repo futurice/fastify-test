@@ -19,6 +19,10 @@ export enum FeedSort {
   New = 'NEW',
   Hot = 'HOT',
 }
+const author = Codec.interface({
+  name: string,
+  guild: string,
+});
 
 export const FeedResponse = array(
   Codec.interface({
@@ -30,12 +34,7 @@ export const FeedResponse = array(
     createdAt: date,
     updatedAt: date,
     commentCount: Integer,
-    author: nullable(
-      Codec.interface({
-        name: string,
-        guild: nullable(string),
-      }),
-    ),
+    author: nullable(author),
   }),
 );
 
@@ -54,4 +53,26 @@ export const CreateCommentInput = Codec.interface({
 
 export const CreateCommentResponse = Codec.interface({
   uuid: NonEmptyString,
+});
+
+export const GetFeedItemParams = Codec.interface({
+  feedItemUuid: NonEmptyString,
+});
+
+export const FeedOneResponse = Codec.interface({
+  uuid: string,
+  type: string,
+  text: nullable(string),
+  image: nullable(string),
+  createdAt: date,
+  updatedAt: date,
+  author: nullable(author),
+  comments: array(
+    Codec.interface({
+      uuid: string,
+      text: string,
+      createdAt: string,
+      author: author,
+    }),
+  ),
 });
