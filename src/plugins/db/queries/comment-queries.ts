@@ -25,7 +25,6 @@ type CreateCommentInput = {
 
 export const create = (input: CreateCommentInput) => {
   const { userId, text, feedItemUuid } = input;
-  console.log(userId, text, feedItemUuid);
   return sql<CommentType>`
     INSERT INTO comment(user_id, text, feed_item_id)
     VALUES (${userId}, ${text}, (SELECT id FROM feed_item WHERE uuid = ${feedItemUuid}))
