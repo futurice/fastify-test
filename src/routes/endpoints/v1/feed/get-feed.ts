@@ -20,8 +20,8 @@ const routes: FastifyPluginAsync = async fastify => {
       },
     }),
     async (req, res) => {
-      const limit = req.query.limit ?? 50;
       const { feedItem } = fastify.sql;
+      const { limit } = req.query;
 
       return EitherAsync(() => fastify.db.any(feedItem.findAll(limit))).caseOf({
         Left: err => {

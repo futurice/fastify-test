@@ -14,6 +14,7 @@ import {
   StringLengthRangedIn,
   Integer,
 } from 'purify-ts-extra-codec';
+import { optionalWithDefault } from '../../../../utils/codec';
 
 export enum FeedSort {
   New = 'NEW',
@@ -39,8 +40,8 @@ export const FeedResponse = array(
 );
 
 export const FeedQuery = Codec.interface({
-  limit: optional(NumberRangedIn({ gte: 1, lte: 100 })),
-  orderBy: optional(enumeration(FeedSort)),
+  limit: optionalWithDefault(NumberRangedIn({ gte: 1, lte: 100 }), 50),
+  orderBy: optionalWithDefault(enumeration(FeedSort), FeedSort.Hot),
 });
 
 export const CreateCommentParams = Codec.interface({
