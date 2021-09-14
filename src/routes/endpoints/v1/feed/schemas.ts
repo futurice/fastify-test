@@ -1,6 +1,5 @@
 import {
   Codec,
-  optional,
   array,
   string,
   boolean,
