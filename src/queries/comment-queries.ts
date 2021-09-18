@@ -1,5 +1,5 @@
 import { sql } from 'slonik';
-import { DateTime, SnakeToCamel } from '../utils';
+import { DateTime, SnakeToCamel } from './utils';
 
 export type FeedItemTypes = 'IMAGE' | 'TEXT';
 

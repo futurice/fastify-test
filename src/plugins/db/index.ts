@@ -12,11 +12,7 @@ import {
   createTimestampWithTimeZoneTypeParser,
   createTimestampTypeParser,
 } from './parsers';
-import * as user from './queries/user-queries';
-import * as action from './queries/action-queries';
-import * as actionType from './queries/action-type-queries';
-import * as feedItem from './queries/feed-item-queries';
-import * as comment from './queries/comment-queries';
+import actions, { Queries } from '../../queries';
 import { transformNameInterceptors } from './utils';
 import config from '../../config';
 
@@ -34,13 +30,7 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
   });
   instance.decorate('db', pool);
 
-  const sql: FastifyInstance['sql'] = {
-    user,
-    action,
-    actionType,
-    feedItem,
-    comment,
-  };
+  const sql: FastifyInstance['sql'] = actions;
   instance.decorate('sql', sql);
 
   done();
@@ -49,13 +39,7 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
 declare module 'fastify' {
   interface FastifyInstance {
     db: DatabasePoolType;
-    sql: {
-      user: typeof user;
-      action: typeof action;
-      actionType: typeof actionType;
-      feedItem: typeof feedItem;
-      comment: typeof comment;
-    };
+    sql: Queries;
   }
 }
 
