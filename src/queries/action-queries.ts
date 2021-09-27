@@ -1,5 +1,9 @@
 import { sql } from 'slonik';
-import { DateTime, SnakeToCamel } from './utils';
+import {
+  DateTime,
+  SnakeToCamel,
+  fetchOne,
+} from './utils';
 
 class ActionRow {
   id: number;
@@ -24,7 +28,7 @@ export type CreateActionInput = {
   text: string | null;
 };
 
-export const create = ({
+export const create = fetchOne(({
   userId,
   actionTypeCode,
   imagePath,
@@ -33,4 +37,4 @@ export const create = ({
   INSERT INTO action("user_id", "action_type_id", "image_path", "text")
   VALUES (${userId}, (SELECT id FROM action_type WHERE code = ${actionTypeCode}), ${imagePath}, ${text})
   RETURNING *;
-`;
+`);

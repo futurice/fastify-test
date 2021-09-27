@@ -1,6 +1,9 @@
 import {
+  DatabaseTransactionConnectionType,
+  TaggedTemplateLiteralInvocationType,
   sql,
 } from 'slonik';
+import { EitherAsync } from 'purify-ts';
 
 export type DateTime = Date;
 
@@ -20,3 +23,17 @@ export const select = (columns: string[]) =>
 
 export const camelToSnakeCase = (str: string) =>
   str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+
+export function fetchOne<I, O>(action: (i: I) => TaggedTemplateLiteralInvocationType<O>) {
+  return (trx: DatabaseTransactionConnectionType, parameters: I) =>
+    EitherAsync<unknown, O>(
+      () => trx.one(action(parameters)),
+    );
+}
+
+export function fetchAny<I, O>(action: (i: I) => TaggedTemplateLiteralInvocationType<O>) {
+  return (trx: DatabaseTransactionConnectionType, parameters: I) =>
+    EitherAsync<unknown, ReadonlyArray<O>>(
+      () => trx.any(action(parameters)),
+    );
+}

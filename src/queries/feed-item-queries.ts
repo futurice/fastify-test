@@ -1,5 +1,11 @@
 import { sql } from 'slonik';
-import { DateTime, SnakeToCamel, camelToSnakeCase } from './utils';
+import {
+  DateTime,
+  SnakeToCamel,
+  camelToSnakeCase,
+  fetchAny,
+  fetchOne,
+} from './utils';
 
 export type FeedItemTypes = 'IMAGE' | 'TEXT';
 
@@ -54,7 +60,7 @@ type FindFeedItemType = FeedItemType & {
   };
 };
 
-export const findAll = (limit: number) => {
+export const findAll = fetchAny((limit: number) => {
   return sql<FindFeedItemType>`
     SELECT
       feed_item.*,
@@ -75,7 +81,7 @@ export const findAll = (limit: number) => {
       guild.name
     LIMIT ${limit};
   `;
-};
+});
 
 type FindOneFeedItemType = FeedItemType & {
   author: {
@@ -93,7 +99,7 @@ type FindOneFeedItemType = FeedItemType & {
   }[];
 };
 
-export const findOne = (uuid: string) => {
+export const findOne = fetchOne((uuid: string) => {
   return sql<FindOneFeedItemType>`
     WITH comment_cte AS (
       SELECT
@@ -135,4 +141,4 @@ export const findOne = (uuid: string) => {
       users.name,
       guild.name
   `;
-};
+});

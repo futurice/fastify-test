@@ -1,5 +1,9 @@
 import { sql } from 'slonik';
-import { DateTime, SnakeToCamel } from './utils';
+import {
+  DateTime,
+  SnakeToCamel,
+  fetchOne,
+} from './utils';
 
 export type FeedItemTypes = 'IMAGE' | 'TEXT';
 
@@ -23,11 +27,11 @@ type CreateCommentInput = {
   text: string;
 };
 
-export const create = (input: CreateCommentInput) => {
+export const create = fetchOne((input: CreateCommentInput) => {
   const { userId, text, feedItemUuid } = input;
   return sql<CommentType>`
     INSERT INTO comment(user_id, text, feed_item_id)
     VALUES (${userId}, ${text}, (SELECT id FROM feed_item WHERE uuid = ${feedItemUuid}))
     RETURNING *;
   `;
-};
+});

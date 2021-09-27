@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from 'fastify';
-import { EitherAsync } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
 import { ForeignKeyIntegrityConstraintViolationError } from 'slonik';
 import {
@@ -30,15 +29,11 @@ const routes: FastifyPluginAsync = async fastify => {
       const { feedItemUuid } = req.params;
       const { comment } = fastify.sql;
 
-      return await EitherAsync(() =>
-        fastify.db.one(
-          comment.create({
-            feedItemUuid,
-            userId: req.user.id,
-            ...req.body,
-          }),
-        ),
-      ).caseOf({
+      return await comment.create(fastify.db, {
+        feedItemUuid,
+        userId: req.user.id,
+        ...req.body,
+      }).caseOf({
         Right: result => res.status(200).send(result),
         Left: err => {
           if (!(err instanceof ForeignKeyIntegrityConstraintViolationError)) {
