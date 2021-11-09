@@ -3,6 +3,7 @@ import fastifyPlugin from 'fastify-plugin';
 import {
   createPool,
   DatabasePoolType,
+  DatabaseConnectionType,
   createBigintTypeParser,
   createDateTypeParser,
   createIntervalTypeParser,
@@ -16,19 +17,26 @@ import actions, { Queries } from '../../queries';
 import { transformNameInterceptors } from './utils';
 import config from '../../config';
 
+let pool: DatabasePoolType;
+export function getPool(): DatabasePoolType {
+  if (!pool) {
+    pool = createPool(config.DATABASE_URL, {
+      interceptors: [transformNameInterceptors()],
+      typeParsers: [
+        createBigintTypeParser(),
+        createDateTypeParser(),
+        createIntervalTypeParser(),
+        createNumericTypeParser(),
+        createTimestampTypeParser(),
+        createTimestampWithTimeZoneTypeParser(),
+      ],
+    });
+  }
+  return pool;
+}
+
 const plugin: FastifyPluginCallback = (instance, _, done) => {
-  const pool = createPool(config.DATABASE_URL, {
-    interceptors: [transformNameInterceptors()],
-    typeParsers: [
-      createBigintTypeParser(),
-      createDateTypeParser(),
-      createIntervalTypeParser(),
-      createNumericTypeParser(),
-      createTimestampTypeParser(),
-      createTimestampWithTimeZoneTypeParser(),
-    ],
-  });
-  instance.decorate('db', pool);
+  instance.decorate('db', getPool());
 
   const sql: FastifyInstance['sql'] = actions;
   instance.decorate('sql', sql);
