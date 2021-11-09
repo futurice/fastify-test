@@ -39,8 +39,6 @@ describe('Action endpoint', () => {
       },
     });
 
-    console.log(createActionResponse.json());
-
     expect(createActionResponse.statusCode).to.equal(200);
 
     const getFeedResponse = await server.inject({
