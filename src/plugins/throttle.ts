@@ -49,10 +49,9 @@ type MarkActionTypeType = (
 export const markActionDone = async (
   instance: FastifyInstance,
 ): Promise<MarkActionTypeType> => {
-  const cache = await EitherAsync(() => {
-    const query = instance.sql.actionType.findAllUserActions();
-    return instance.db.any(query);
-  })
+  const { actionType } = instance.sql;
+
+  const cache = await actionType.findAllUserActions(instance.db)
     .map(actionTypes =>
       actionTypes.reduce((acc, actionType) => {
         acc[actionType.code as ActionType] = actionType.cooldown;

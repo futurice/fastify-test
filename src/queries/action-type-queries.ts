@@ -1,6 +1,9 @@
 import { sql } from 'slonik';
-import { DateTime } from './utils';
-import { SnakeToCamel } from './utils';
+import {
+  DateTime,
+  SnakeToCamel,
+  fetchAny,
+} from './utils';
 
 class ActionTypeRow {
   id: number;
@@ -17,8 +20,10 @@ export type ActionTypeType = {
   [K in keyof ActionTypeRow as SnakeToCamel<K>]: ActionTypeRow[K];
 };
 
-export const findAllUserActions = () => sql<ActionTypeType>`
-  SELECT *
-  FROM action_type
-  WHERE is_user_action IS TRUE;
-`;
+export const findAllUserActions = fetchAny<void, ActionTypeType>(
+  () => sql<ActionTypeType>`
+    SELECT *
+    FROM action_type
+    WHERE is_user_action IS TRUE;
+  `
+);

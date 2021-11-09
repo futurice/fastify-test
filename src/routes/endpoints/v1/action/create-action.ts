@@ -38,15 +38,13 @@ const routes: FastifyPluginAsync = async fastify => {
         const generateFeedItem = (newAction: ActionRowType) =>
           EitherAsync(async () => {
             if (type === ActionType.IMAGE || type === ActionType.TEXT) {
-              await trx.one(
-                feedItem.create({
-                  type,
-                  actionId: newAction.id,
-                  text,
-                  userId: req.user.id,
-                  // imagePath,
-                }),
-              );
+              await feedItem.create(trx, {
+                type,
+                actionId: newAction.id,
+                text,
+                userId: req.user.id,
+                // imagePath,
+              });
             }
             return newAction;
           });

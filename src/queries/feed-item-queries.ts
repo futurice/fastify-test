@@ -36,7 +36,7 @@ type CreateFeedItemInput = {
   type: FeedItemTypes;
 };
 
-export const create = (input: CreateFeedItemInput) => {
+export const create = fetchOne((input: CreateFeedItemInput) => {
   const columns = Object.keys(input)
     .map(key => camelToSnakeCase(key))
     .map(column => sql.identifier([column]));
@@ -50,7 +50,7 @@ export const create = (input: CreateFeedItemInput) => {
     VALUES (${sql.join(values, sql`, `)})
     RETURNING *;
   `;
-};
+});
 
 type FindFeedItemType = FeedItemType & {
   commentCount: number;
