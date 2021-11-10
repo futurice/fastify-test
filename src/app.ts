@@ -9,7 +9,7 @@ import config from './config';
 
 export function build(
   opts: FastifyServerOptions,
-  useGracefulShutdown: boolean = true,
+  useGracefulShutdown = true,
 ): FastifyInstance {
   const app = fastify(opts);
 
