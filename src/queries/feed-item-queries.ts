@@ -46,11 +46,11 @@ export const create = query(
       value !== undefined ? value : null,
     );
 
-    return sql<FeedItemType>`
-    INSERT INTO feed_item(${sql.join(columns, sql`, `)})
-    VALUES (${sql.join(values, sql`, `)})
-    RETURNING *;
-  `;
+    return trx.one(sql<FeedItemType>`
+      INSERT INTO feed_item(${sql.join(columns, sql`, `)})
+      VALUES (${sql.join(values, sql`, `)})
+      RETURNING *;
+    `);
   },
 );
 

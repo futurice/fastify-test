@@ -31,6 +31,6 @@ export const create = query(
       INSERT INTO comment(user_id, text, feed_item_id)
       VALUES (${userId}, ${text}, (SELECT id FROM feed_item WHERE uuid = ${feedItemUuid}))
       RETURNING *;
-  `);
+    `);
   },
 );
