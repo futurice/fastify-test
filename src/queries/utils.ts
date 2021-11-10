@@ -1,6 +1,6 @@
 import {
+  DatabasePoolConnectionType,
   DatabaseTransactionConnectionType,
-  TaggedTemplateLiteralInvocationType,
   sql,
 } from 'slonik';
 import { EitherAsync } from 'purify-ts';
@@ -24,16 +24,20 @@ export const select = (columns: string[]) =>
 export const camelToSnakeCase = (str: string) =>
   str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 
-export function fetchOne<I, O>(action: (i: I) => TaggedTemplateLiteralInvocationType<O>) {
-  return (trx: DatabaseTransactionConnectionType, parameters: I) =>
-    EitherAsync<unknown, O>(
-      () => trx.one(action(parameters)),
-    );
-}
+export type DatabaseConnection =
+  | DatabasePoolConnectionType
+  | DatabaseTransactionConnectionType;
 
-export function fetchAny<I, O>(action: (i: I) => TaggedTemplateLiteralInvocationType<O>) {
-  return (trx: DatabaseTransactionConnectionType, parameters: I) =>
-    EitherAsync<unknown, ReadonlyArray<O>>(
-      () => trx.any(action(parameters)),
-    );
-}
+type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
+type Query = (...args: any) => any;
+type QueryBuilder = <TQuery extends Query>(
+  query: TQuery,
+) => (
+  ...args: Parameters<TQuery>
+) => EitherAsync<unknown, Awaited<ReturnType<TQuery>>>;
+
+export const query: QueryBuilder = dbQuery => {
+  return (...args) => {
+    return EitherAsync(() => dbQuery(...((args as unknown) as any)));
+  };
+};

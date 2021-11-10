@@ -1,9 +1,5 @@
 import { sql } from 'slonik';
-import {
-  DateTime,
-  SnakeToCamel,
-  fetchOne,
-} from './utils';
+import { DateTime, SnakeToCamel, query, DatabaseConnection } from './utils';
 
 class ActionRow {
   id: number;
@@ -28,13 +24,13 @@ export type CreateActionInput = {
   text: string | null;
 };
 
-export const create = fetchOne(({
-  userId,
-  actionTypeCode,
-  imagePath,
-  text,
-}: CreateActionInput) => sql<ActionType>`
-  INSERT INTO action("user_id", "action_type_id", "image_path", "text")
-  VALUES (${userId}, (SELECT id FROM action_type WHERE code = ${actionTypeCode}), ${imagePath}, ${text})
-  RETURNING *;
-`);
+export const create = query(
+  (trx: DatabaseConnection, input: CreateActionInput) => {
+    const { userId, actionTypeCode, imagePath, text } = input;
+    trx.one(sql<ActionType>`
+      INSERT INTO action("user_id", "action_type_id", "image_path", "text")
+      VALUES (${userId}, (SELECT id FROM action_type WHERE code = ${actionTypeCode}), ${imagePath}, ${text})
+      RETURNING *;
+    `);
+  },
+);

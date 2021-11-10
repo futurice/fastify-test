@@ -3,8 +3,8 @@ import {
   DateTime,
   SnakeToCamel,
   camelToSnakeCase,
-  fetchAny,
-  fetchOne,
+  DatabaseConnection,
+  query,
 } from './utils';
 
 export type FeedItemTypes = 'IMAGE' | 'TEXT';
@@ -36,21 +36,23 @@ type CreateFeedItemInput = {
   type: FeedItemTypes;
 };
 
-export const create = fetchOne((input: CreateFeedItemInput) => {
-  const columns = Object.keys(input)
-    .map(key => camelToSnakeCase(key))
-    .map(column => sql.identifier([column]));
+export const create = query(
+  (trx: DatabaseConnection, input: CreateFeedItemInput) => {
+    const columns = Object.keys(input)
+      .map(key => camelToSnakeCase(key))
+      .map(column => sql.identifier([column]));
 
-  const values = Object.values(input).map(value =>
-    value !== undefined ? value : null,
-  );
+    const values = Object.values(input).map(value =>
+      value !== undefined ? value : null,
+    );
 
-  return sql<FeedItemType>`
+    return sql<FeedItemType>`
     INSERT INTO feed_item(${sql.join(columns, sql`, `)})
     VALUES (${sql.join(values, sql`, `)})
     RETURNING *;
   `;
-});
+  },
+);
 
 type FindFeedItemType = FeedItemType & {
   commentCount: number;
@@ -60,8 +62,8 @@ type FindFeedItemType = FeedItemType & {
   };
 };
 
-export const findAll = fetchAny((limit: number) => {
-  return sql<FindFeedItemType>`
+export const findAll = query((trx: DatabaseConnection, limit: number) => {
+  return trx.any(sql<FindFeedItemType>`
     SELECT
       feed_item.*,
       users.name AS author,
@@ -80,7 +82,7 @@ export const findAll = fetchAny((limit: number) => {
       users.name,
       guild.name
     LIMIT ${limit};
-  `;
+  `);
 });
 
 type FindOneFeedItemType = FeedItemType & {
@@ -99,8 +101,8 @@ type FindOneFeedItemType = FeedItemType & {
   }[];
 };
 
-export const findOne = fetchOne((uuid: string) => {
-  return sql<FindOneFeedItemType>`
+export const findOne = query((trx: DatabaseConnection, uuid: string) => {
+  return trx.one(sql<FindOneFeedItemType>`
     WITH comment_cte AS (
       SELECT
         comment.uuid,
@@ -140,5 +142,5 @@ export const findOne = fetchOne((uuid: string) => {
       feed_item.id,
       users.name,
       guild.name
-  `;
+  `);
 });
