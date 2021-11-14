@@ -12,7 +12,7 @@ import {
   createTimestampWithTimeZoneTypeParser,
   createTimestampTypeParser,
 } from './parsers';
-import actions, { Queries } from '../../queries';
+import * as queries from '../../queries';
 import { transformNameInterceptors } from './utils';
 import config from '../../config';
 
@@ -37,7 +37,7 @@ export function getPool(): DatabasePoolType {
 const plugin: FastifyPluginCallback = (instance, _, done) => {
   instance.decorate('db', getPool());
 
-  const sql: FastifyInstance['sql'] = actions;
+  const sql: FastifyInstance['sql'] = queries;
   instance.decorate('sql', sql);
 
   done();
@@ -46,7 +46,7 @@ const plugin: FastifyPluginCallback = (instance, _, done) => {
 declare module 'fastify' {
   interface FastifyInstance {
     db: DatabasePoolType;
-    sql: Queries;
+    sql: typeof queries;
   }
 }
 
