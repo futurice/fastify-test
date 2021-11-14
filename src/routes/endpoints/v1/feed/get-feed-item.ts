@@ -21,8 +21,7 @@ const routes: FastifyPluginAsync = async fastify => {
     async (req, res) => {
       const { feedItem } = fastify.sql;
 
-      return feedItem.findOne(fastify.db, req.params.feedItemUuid)
-      .caseOf({
+      return feedItem.findOne(fastify.db, req.params.feedItemUuid).caseOf({
         Left: err => {
           req.log.error(`Error getting feed item: ${err}`);
           throw fastify.httpErrors.internalServerError();

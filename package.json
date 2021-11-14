@@ -10,6 +10,7 @@
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"wait-on dist/server.js && npm run watch-node\"",
     "clean": "rimraf dist",
     "prebuild-ts": "npm run clean",
+    "prettier": "prettier --write \"**/*.ts\"",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
     "watch-node": "nodemon dist/server.js",

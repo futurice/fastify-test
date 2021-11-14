@@ -1,8 +1,4 @@
-import {
-  InterceptorType,
-  FieldType,
-  QueryResultRowColumnType,
-} from 'slonik';
+import { InterceptorType, FieldType, QueryResultRowColumnType } from 'slonik';
 
 export const transformNameInterceptors: () => InterceptorType = () => {
   const underscoreFieldRegex = /^[a-z0-9_]+$/;

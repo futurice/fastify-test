@@ -18,8 +18,7 @@ const routes: FastifyPluginAsync = async fastify => {
     }),
     async (req, res) => {
       const { actionType } = fastify.sql;
-      return actionType.findAllUserActions(fastify.db)
-      .caseOf({
+      return actionType.findAllUserActions(fastify.db).caseOf({
         Left: err => {
           req.log.error(`Error getting action types: ${err}`);
           throw fastify.httpErrors.internalServerError();

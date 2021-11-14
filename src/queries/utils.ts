@@ -1,7 +1,4 @@
-import {
-  DatabaseTransactionConnectionType,
-  sql,
-} from 'slonik';
+import { DatabaseTransactionConnectionType, sql } from 'slonik';
 import { EitherAsync } from 'purify-ts';
 
 export type DateTime = Date;
@@ -26,16 +23,8 @@ export const camelToSnakeCase = (str: string) =>
 export type Transaction = DatabaseTransactionConnectionType;
 
 export function buildQuery<I, O>(
-  action: (
-    trx: Transaction,
-    i: I
-  ) => Promise<Readonly<O>>
+  action: (trx: Transaction, i: I) => Promise<Readonly<O>>,
 ) {
-  return (
-    trx: Transaction,
-    parameters: I
-  ) =>
-    EitherAsync<unknown, Readonly<O>>(
-      () => action(trx, parameters),
-    );
+  return (trx: Transaction, parameters: I) =>
+    EitherAsync<unknown, Readonly<O>>(() => action(trx, parameters));
 }

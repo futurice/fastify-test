@@ -51,7 +51,8 @@ export const markActionDone = async (
 ): Promise<MarkActionTypeType> => {
   const { actionType } = instance.sql;
 
-  const cache = await actionType.findAllUserActions(instance.db)
+  const cache = await actionType
+    .findAllUserActions(instance.db)
     .map(actionTypes =>
       actionTypes.reduce((acc, actionType) => {
         acc[actionType.code as ActionType] = actionType.cooldown;

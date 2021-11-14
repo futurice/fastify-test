@@ -36,24 +36,23 @@ type CreateFeedItemInput = {
   type: FeedItemTypes;
 };
 
-export const create = buildQuery((
-  trx: Transaction,
-  input: CreateFeedItemInput
-) => {
-  const columns = Object.keys(input)
-    .map(key => camelToSnakeCase(key))
-    .map(column => sql.identifier([column]));
+export const create = buildQuery(
+  (trx: Transaction, input: CreateFeedItemInput) => {
+    const columns = Object.keys(input)
+      .map(key => camelToSnakeCase(key))
+      .map(column => sql.identifier([column]));
 
-  const values = Object.values(input).map(value =>
-    value !== undefined ? value : null,
-  );
+    const values = Object.values(input).map(value =>
+      value !== undefined ? value : null,
+    );
 
-  return trx.one(sql<FeedItemType>`
+    return trx.one(sql<FeedItemType>`
     INSERT INTO feed_item(${sql.join(columns, sql`, `)})
     VALUES (${sql.join(values, sql`, `)})
     RETURNING *;
   `);
-});
+  },
+);
 
 type FindFeedItemType = FeedItemType & {
   commentCount: number;
@@ -63,10 +62,7 @@ type FindFeedItemType = FeedItemType & {
   };
 };
 
-export const findAll = buildQuery((
-  trx: Transaction,
-  limit: number
-) => {
+export const findAll = buildQuery((trx: Transaction, limit: number) => {
   return trx.any(sql<FindFeedItemType>`
     SELECT
       feed_item.*,
@@ -105,10 +101,7 @@ type FindOneFeedItemType = FeedItemType & {
   }[];
 };
 
-export const findOne = buildQuery((
-  trx: Transaction,
-  uuid: string
-) => {
+export const findOne = buildQuery((trx: Transaction, uuid: string) => {
   return trx.one(sql<FindOneFeedItemType>`
     WITH comment_cte AS (
       SELECT

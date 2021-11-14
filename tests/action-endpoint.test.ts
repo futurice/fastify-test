@@ -12,21 +12,24 @@ describe('Action endpoint', () => {
   let server: FastifyInstance;
 
   before(() => {
-    server = build({
-      logger: { prettyPrint: true },
-    }, false);
+    server = build(
+      {
+        logger: { prettyPrint: true },
+      },
+      false,
+    );
   });
 
   after(async () => {
     await server.close();
-  })
+  });
 
   beforeEach(async () => {
     const pool = getPool();
     await pool.query(sql`TRUNCATE comment, action, feed_item`);
-  })
+  });
 
-  it('should generate a new feed item when sending a text message', async () => {
+  it.only('should generate a new feed item when sending a text message', async () => {
     const createActionResponse = await createAction(server, {
       imageData: '',
       text: 'Test message text',
@@ -38,7 +41,7 @@ describe('Action endpoint', () => {
     const getFeedResponse = await getFeeds(server);
 
     expect(getFeedResponse.statusCode).to.equal(200);
-  
+
     const feedItems = getFeedResponse.json();
     expect(feedItems.length).to.equal(1);
     expect(feedItems[0].uuid).to.be.a('string');
@@ -53,8 +56,8 @@ describe('Action endpoint', () => {
       author: {
         name: 'hessu',
         guild: 'TiTe',
-      }
-    })
+      },
+    });
   });
 
   it('should generate a new feed item when sending an image message', async () => {
@@ -69,7 +72,7 @@ describe('Action endpoint', () => {
     const getFeedResponse = await getFeeds(server);
 
     expect(getFeedResponse.statusCode).to.equal(200);
-  
+
     const feedItems = getFeedResponse.json();
     expect(feedItems.length).to.equal(1);
     expect(feedItems[0].uuid).to.be.a('string');
@@ -84,7 +87,7 @@ describe('Action endpoint', () => {
       author: {
         name: 'hessu',
         guild: 'TiTe',
-      }
-    })
+      },
+    });
   });
 });
