@@ -24,16 +24,19 @@ export const select = (columns: string[]) =>
 export const camelToSnakeCase = (str: string) =>
   str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 
-export function fetchOne<I, O>(action: (i: I) => TaggedTemplateLiteralInvocationType<O>) {
-  return (trx: DatabaseTransactionConnectionType, parameters: I) =>
-    EitherAsync<unknown, O>(
-      () => trx.one(action(parameters)),
-    );
-}
+export type Transaction = DatabaseTransactionConnectionType;
 
-export function fetchAny<I, O>(action: (i: I) => TaggedTemplateLiteralInvocationType<O>) {
-  return (trx: DatabaseTransactionConnectionType, parameters: I) =>
-    EitherAsync<unknown, ReadonlyArray<O>>(
-      () => trx.any(action(parameters)),
+export function buildQuery<I, O>(
+  action: (
+    trx: Transaction,
+    i: I
+  ) => Promise<Readonly<O>>
+) {
+  return (
+    trx: Transaction,
+    parameters: I
+  ) =>
+    EitherAsync<unknown, Readonly<O>>(
+      () => action(trx, parameters),
     );
 }
