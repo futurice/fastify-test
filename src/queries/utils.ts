@@ -1,6 +1,5 @@
 import {
   DatabaseTransactionConnectionType,
-  TaggedTemplateLiteralInvocationType,
   sql,
 } from 'slonik';
 import { EitherAsync } from 'purify-ts';

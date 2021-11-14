@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from 'fastify';
-import { EitherAsync } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
 import { ActionTypeResponse } from './schemas';
 

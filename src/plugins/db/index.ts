@@ -3,7 +3,6 @@ import fastifyPlugin from 'fastify-plugin';
 import {
   createPool,
   DatabasePoolType,
-  DatabaseConnectionType,
   createBigintTypeParser,
   createDateTypeParser,
   createIntervalTypeParser,
