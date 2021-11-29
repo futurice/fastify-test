@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from 'fastify';
-import { EitherAsync } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
 import { FeedResponse, FeedQuery } from './schemas';
 
@@ -23,7 +22,7 @@ const routes: FastifyPluginAsync = async fastify => {
       const { feedItem } = fastify.sql;
       const { limit } = req.query;
 
-      return EitherAsync(() => fastify.db.any(feedItem.findAll(limit))).caseOf({
+      return feedItem.findAll(fastify.db, limit).caseOf({
         Left: err => {
           req.log.error(`Error getting feed: ${err}`);
           throw fastify.httpErrors.internalServerError();

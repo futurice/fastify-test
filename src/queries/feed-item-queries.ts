@@ -1,5 +1,11 @@
 import { sql } from 'slonik';
-import { DateTime, SnakeToCamel, camelToSnakeCase } from '../utils';
+import {
+  DateTime,
+  SnakeToCamel,
+  Transaction,
+  camelToSnakeCase,
+  buildQuery,
+} from './utils';
 
 export type FeedItemTypes = 'IMAGE' | 'TEXT';
 
@@ -30,21 +36,23 @@ type CreateFeedItemInput = {
   type: FeedItemTypes;
 };
 
-export const create = (input: CreateFeedItemInput) => {
-  const columns = Object.keys(input)
-    .map(key => camelToSnakeCase(key))
-    .map(column => sql.identifier([column]));
+export const create = buildQuery(
+  (trx: Transaction, input: CreateFeedItemInput) => {
+    const columns = Object.keys(input)
+      .map(key => camelToSnakeCase(key))
+      .map(column => sql.identifier([column]));
 
-  const values = Object.values(input).map(value =>
-    value !== undefined ? value : null,
-  );
+    const values = Object.values(input).map(value =>
+      value !== undefined ? value : null,
+    );
 
-  return sql<FeedItemType>`
+    return trx.one(sql<FeedItemType>`
     INSERT INTO feed_item(${sql.join(columns, sql`, `)})
     VALUES (${sql.join(values, sql`, `)})
     RETURNING *;
-  `;
-};
+  `);
+  },
+);
 
 type FindFeedItemType = FeedItemType & {
   commentCount: number;
@@ -54,8 +62,8 @@ type FindFeedItemType = FeedItemType & {
   };
 };
 
-export const findAll = (limit: number) => {
-  return sql<FindFeedItemType>`
+export const findAll = buildQuery((trx: Transaction, limit: number) => {
+  return trx.any(sql<FindFeedItemType>`
     SELECT
       feed_item.*,
       users.name AS author,
@@ -74,8 +82,8 @@ export const findAll = (limit: number) => {
       users.name,
       guild.name
     LIMIT ${limit};
-  `;
-};
+  `);
+});
 
 type FindOneFeedItemType = FeedItemType & {
   author: {
@@ -93,8 +101,8 @@ type FindOneFeedItemType = FeedItemType & {
   }[];
 };
 
-export const findOne = (uuid: string) => {
-  return sql<FindOneFeedItemType>`
+export const findOne = buildQuery((trx: Transaction, uuid: string) => {
+  return trx.one(sql<FindOneFeedItemType>`
     WITH comment_cte AS (
       SELECT
         comment.uuid,
@@ -134,5 +142,5 @@ export const findOne = (uuid: string) => {
       feed_item.id,
       users.name,
       guild.name
-  `;
-};
+  `);
+});

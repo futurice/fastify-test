@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { EitherAsync } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
-import { ActionType as ActionRowType } from '../../../../plugins/db/queries/action-queries';
+import { ActionType as ActionRowType } from '../../../../queries/action-queries';
 import { CreateActionInput, CreateActionResponse, ActionType } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
@@ -27,30 +27,24 @@ const routes: FastifyPluginAsync = async fastify => {
         const { action, feedItem } = fastify.sql;
         const { imageData, text, type } = req.body;
 
-        const createAction = EitherAsync(() =>
-          trx.one(
-            action.create({
-              userId: req.user.id,
-              imagePath: imageData ?? null,
-              text: text ?? null,
-              actionTypeCode: type,
-            }),
-          ),
-        );
+        const createAction = action.create(trx, {
+          userId: req.user.id,
+          imagePath: imageData ?? null,
+          text: text ?? null,
+          actionTypeCode: type,
+        });
 
         // Generates a feeditem, if action type should result in one.
         const generateFeedItem = (newAction: ActionRowType) =>
           EitherAsync(async () => {
             if (type === ActionType.IMAGE || type === ActionType.TEXT) {
-              await trx.one(
-                feedItem.create({
-                  type,
-                  actionId: newAction.id,
-                  text,
-                  userId: req.user.id,
-                  // imagePath,
-                }),
-              );
+              await feedItem.create(trx, {
+                type,
+                actionId: newAction.id,
+                text,
+                userId: req.user.id,
+                // imagePath,
+              });
             }
             return newAction;
           });

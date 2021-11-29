@@ -7,9 +7,19 @@ import redis from './plugins/redis';
 import routes from './routes';
 import config from './config';
 
-export function build(opts: FastifyServerOptions): FastifyInstance {
+export function build(
+  opts: FastifyServerOptions,
+  useGracefulShutdown = true,
+): FastifyInstance {
   const app = fastify(opts);
-  app.register(gracefulShutdown);
+
+  if (useGracefulShutdown) {
+    // The graceful shutdown module messes up Mocha tests.
+    // Tests restart the server multiple times, but the gracefulShutdown
+    // module doesn't clear its garbage and crashes on restart.
+    app.register(gracefulShutdown);
+  }
+
   app.register(sensible);
   app.register(redis);
   app.register(db);

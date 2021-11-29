@@ -10,7 +10,7 @@ import { NonEmptyString } from 'purify-ts-extra-codec';
 import fastifyPlugin from 'fastify-plugin';
 import { NotFoundError } from 'slonik';
 import fastifyAuth from 'fastify-auth';
-import { UserType } from '../plugins/db/queries/user-queries';
+import { UserType } from '../queries/user-queries';
 
 interface ITokenPluginOpts {
   token: string;
