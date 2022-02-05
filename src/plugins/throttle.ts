@@ -26,12 +26,12 @@ export const canDoAction: (
   });
 
   const redisQuery = instance.redis.exists(key(req.user.uuid, body.type));
-  return await EitherAsync(() => redisQuery)
+  return EitherAsync(() => redisQuery)
     .map(result => result === 1)
     .caseOf({
       Right: exists => {
         if (exists) {
-          throw instance.httpErrors.unauthorized();
+          throw instance.httpErrors.forbidden('Cooldown active');
         }
       },
       Left: err => {
