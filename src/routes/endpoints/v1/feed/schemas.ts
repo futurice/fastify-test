@@ -37,28 +37,28 @@ export const FeedResponse = array(
   }),
 );
 
-export const FeedQuery = Codec.interface({
+export const feedQuery = Codec.interface({
   limit: optionalWithDefault(NumberRangedIn({ gte: 1, lte: 100 }), 50),
   orderBy: optionalWithDefault(enumeration(FeedSort), FeedSort.Hot),
 });
 
-export const CreateCommentParams = Codec.interface({
+export const createCommentParams = Codec.interface({
   feedItemUuid: uuid,
 });
 
-export const CreateCommentInput = Codec.interface({
+export const createCommentDTO = Codec.interface({
   text: StringLengthRangedIn({ gt: 0, lte: 1000 }),
 });
 
-export const CreateCommentResponse = Codec.interface({
+export const createCommentResponse = Codec.interface({
   uuid: uuid,
 });
 
-export const GetFeedItemParams = Codec.interface({
+export const getFeedItemParams = Codec.interface({
   feedItemUuid: uuid,
 });
 
-export const FeedOneResponse = Codec.interface({
+export const feedOneResponse = Codec.interface({
   uuid: uuid,
   type: string,
   text: nullable(string),

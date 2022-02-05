@@ -6,12 +6,12 @@ export enum ActionType {
   SIMA = 'SIMA',
 }
 
-export const CreateActionInput = Codec.interface({
+export const createActionDTO = Codec.interface({
   imageData: optional(string),
   text: optional(string),
   type: enumeration(ActionType),
 });
 
-export const CreateActionResponse = Codec.interface({
+export const createActionResponse = Codec.interface({
   success: boolean,
 });

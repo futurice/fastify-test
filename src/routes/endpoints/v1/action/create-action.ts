@@ -2,12 +2,12 @@ import { FastifyPluginAsync } from 'fastify';
 import { EitherAsync } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
 import { ActionType as ActionRowType } from '../../../../queries/action-queries';
-import { CreateActionInput, CreateActionResponse, ActionType } from './schemas';
+import { createActionDTO, createActionResponse, ActionType } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
   fastify.post<{
-    Reply: GetType<typeof CreateActionResponse>;
-    Body: GetType<typeof CreateActionInput>;
+    Reply: GetType<typeof createActionResponse>;
+    Body: GetType<typeof createActionDTO>;
   }>(
     '/',
     fastify.secureRoute.user({
@@ -16,9 +16,9 @@ const routes: FastifyPluginAsync = async fastify => {
         description: 'Create action',
         tags: ['action'],
         response: {
-          200: CreateActionResponse.schema(),
+          200: createActionResponse.schema(),
         },
-        body: CreateActionInput.schema(),
+        body: createActionDTO.schema(),
       },
     }),
     (req, res) => {
@@ -49,14 +49,9 @@ const routes: FastifyPluginAsync = async fastify => {
             return newAction;
           });
 
-        const markDone = () =>
-          EitherAsync(() =>
-            fastify.throttle.markActionDone(req.user.uuid, type),
-          );
-
         const result = await createAction
           .chain(generateFeedItem)
-          .chain(markDone)
+          .chain(() => fastify.throttle.markActionDone(req.user.uuid, type))
           .map(() => ({ success: true }))
           .mapLeft(err => {
             req.log.error(`Error creating action: ${err}`);

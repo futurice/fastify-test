@@ -1,20 +1,20 @@
 import { FastifyPluginAsync } from 'fastify';
 import { GetType } from 'purify-ts/Codec';
-import { FeedOneResponse, GetFeedItemParams } from './schemas';
+import { feedOneResponse, getFeedItemParams } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
   fastify.get<{
-    Params: GetType<typeof GetFeedItemParams>;
-    Reply: GetType<typeof FeedOneResponse>;
+    Params: GetType<typeof getFeedItemParams>;
+    Reply: GetType<typeof feedOneResponse>;
   }>(
     '/:feedItemUuid',
     fastify.secureRoute.authenticated({
       schema: {
-        params: GetFeedItemParams.schema(),
+        params: getFeedItemParams.schema(),
         description: 'A single feed item and related comments',
         tags: ['feed'],
         response: {
-          200: FeedOneResponse.schema(),
+          200: feedOneResponse.schema(),
         },
       },
     }),

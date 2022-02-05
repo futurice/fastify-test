@@ -6,7 +6,7 @@ import { uuid, regexStr } from '../../../../utils/codec';
 // TODO: Unicode charactes
 const nameRegEx = /^[a-zA-Z\d\-_]{2,30}$/;
 
-export const userRegistration = Codec.interface({
+export const userRegistrationDTO = Codec.interface({
   name: regexStr(nameRegEx),
   teamId: Integer,
 });

@@ -7,7 +7,7 @@ import fastifyPlugin from 'fastify-plugin';
 import { EitherAsync } from 'purify-ts';
 import {
   ActionType,
-  CreateActionInput,
+  createActionDTO,
 } from '../routes/endpoints/v1/action/schemas';
 
 const key = (uuid: string, action: ActionType) => `${uuid}:${action}`;
@@ -17,13 +17,13 @@ type CooldownCache = Record<ActionType, number>;
 export const canDoAction: (
   instance: FastifyInstance,
 ) => preHandlerAsyncHookHandler = instance => async req => {
-  const body = CreateActionInput.decode(req.body).caseOf({
-    Right: result => result,
-    Left: err => {
+  const body = createActionDTO
+    .decode(req.body)
+    .mapLeft(err => {
       instance.log.error(`Unexpected canDoAction input: ${err}`);
       throw instance.httpErrors.internalServerError();
-    },
-  });
+    })
+    .extract();
 
   const redisQuery = instance.redis.exists(key(req.user.uuid, body.type));
   return EitherAsync(() => redisQuery)
@@ -51,20 +51,19 @@ export const markActionDone = async (
 ): Promise<MarkActionTypeType> => {
   const { actionType } = instance.sql;
 
-  const actionTypeCooldowns = await actionType
-    .findAllUserActions(instance.db)
-    .map(actionTypes =>
-      actionTypes.reduce((acc, actionType) => {
-        acc[actionType.code as ActionType] = actionType.cooldown;
-        return acc;
-      }, {} as CooldownCache),
-    )
-    .caseOf({
-      Right: result => result,
-      Left: err => {
+  const actionTypeCooldowns = (
+    await actionType
+      .findAllUserActions(instance.db)
+      .map(actionTypes =>
+        actionTypes.reduce((acc, actionType) => {
+          acc[actionType.code as ActionType] = actionType.cooldown;
+          return acc;
+        }, {} as CooldownCache),
+      )
+      .mapLeft(err => {
         throw new Error(`Failed to load action types in-memory: ${err}`);
-      },
-    });
+      })
+  ).extract();
 
   return (uuid, action) => {
     const redisQuery = instance.redis.set(

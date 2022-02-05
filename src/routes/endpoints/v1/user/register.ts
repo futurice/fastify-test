@@ -4,19 +4,19 @@ import {
   ForeignKeyIntegrityConstraintViolationError,
   UniqueIntegrityConstraintViolationError,
 } from 'slonik';
-import { userRegistration, userRegistrationResponse } from './schemas';
+import { userRegistrationDTO, userRegistrationResponse } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
   fastify.post<{
     Reply: GetType<typeof userRegistrationResponse>;
-    Body: GetType<typeof userRegistration>;
+    Body: GetType<typeof userRegistrationDTO>;
   }>(
     '/register',
     fastify.secureRoute.authenticated({
       schema: {
         description: 'Register a new user',
         tags: ['user'],
-        body: userRegistration.schema(),
+        body: userRegistrationDTO.schema(),
         response: {
           200: userRegistrationResponse.schema(),
         },

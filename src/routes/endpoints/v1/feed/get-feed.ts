@@ -1,10 +1,10 @@
 import { FastifyPluginAsync } from 'fastify';
 import { GetType } from 'purify-ts/Codec';
-import { FeedResponse, FeedQuery } from './schemas';
+import { FeedResponse, feedQuery } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
   fastify.get<{
-    Querystring: GetType<typeof FeedQuery>;
+    Querystring: GetType<typeof feedQuery>;
     Reply: GetType<typeof FeedResponse>;
   }>(
     '/',
@@ -12,7 +12,7 @@ const routes: FastifyPluginAsync = async fastify => {
       schema: {
         description: 'Main feed content',
         tags: ['feed'],
-        querystring: FeedQuery.schema(),
+        querystring: feedQuery.schema(),
         response: {
           200: FeedResponse.schema(),
         },
