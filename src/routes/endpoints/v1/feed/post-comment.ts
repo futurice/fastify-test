@@ -35,7 +35,7 @@ const routes: FastifyPluginAsync = async fastify => {
           userId: req.user.id,
           ...req.body,
         })
-        .mapLeft(err => {
+        .catch(err => {
           if (!(err instanceof ForeignKeyIntegrityConstraintViolationError)) {
             throw fastify.httpErrors.notFound('Feed item does not exist');
           }
@@ -43,7 +43,7 @@ const routes: FastifyPluginAsync = async fastify => {
           throw fastify.httpErrors.internalServerError();
         });
 
-      return res.status(200).send(result.extract());
+      return res.status(200).send(result);
     },
   );
 };

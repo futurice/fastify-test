@@ -58,7 +58,6 @@ CREATE TABLE "action" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
     "action_type_id" INTEGER NOT NULL,
-    "image_path" TEXT,
     "text" TEXT,
     "aggregated" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

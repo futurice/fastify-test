@@ -20,13 +20,12 @@ const routes: FastifyPluginAsync = async fastify => {
       const { actionType } = fastify.sql;
       const result = await actionType
         .findAllUserActions(fastify.db)
-        .map(result => result.slice())
-        .mapLeft(err => {
+        .catch(err => {
           req.log.error(`Error getting action types: ${err}`);
           throw fastify.httpErrors.internalServerError();
         });
 
-      return res.status(200).send(result.extract());
+      return res.status(200).send(result.slice());
     },
   );
 };

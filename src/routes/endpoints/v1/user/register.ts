@@ -24,7 +24,7 @@ const routes: FastifyPluginAsync = async fastify => {
     }),
     async (req, res) => {
       const { user } = fastify.sql;
-      const result = await user.create(fastify.db, req.body).mapLeft(err => {
+      const result = await user.create(fastify.db, req.body).catch(err => {
         if (err instanceof ForeignKeyIntegrityConstraintViolationError) {
           throw fastify.httpErrors.notFound('No such team');
         }
@@ -35,7 +35,7 @@ const routes: FastifyPluginAsync = async fastify => {
         throw fastify.httpErrors.internalServerError();
       });
 
-      return res.status(200).send(result.extract());
+      return res.status(200).send(result);
     },
   );
 };

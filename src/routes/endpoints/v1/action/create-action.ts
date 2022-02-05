@@ -1,8 +1,9 @@
 import { FastifyPluginAsync } from 'fastify';
-import { EitherAsync } from 'purify-ts';
+import { Maybe, Nothing, Either } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
 import { ActionType as ActionRowType } from '../../../../queries/action-queries';
 import { createActionDTO, createActionResponse, ActionType } from './schemas';
+import { uploadImage } from '../../../../utils/imageUtil';
 
 const routes: FastifyPluginAsync = async fastify => {
   fastify.post<{
@@ -23,42 +24,46 @@ const routes: FastifyPluginAsync = async fastify => {
     }),
     (req, res) => {
       return fastify.db.transaction(async trx => {
-        // TODO Upload image, if IMAGE action.
         const { action, feedItem } = fastify.sql;
-        const { imageData, text, type } = req.body;
+        const { type } = req.body;
 
-        const createAction = action.create(trx, {
+        const getTextComponent = (action: GetType<typeof createActionDTO>) => {
+          switch (action.type) {
+            case ActionType.IMAGE:
+            case ActionType.TEXT:
+              return action.text ?? null;
+            case ActionType.SIMA:
+              return null;
+          }
+        };
+
+        // Generates a feeditem, if action type should result in one.
+        const generateFeedItem = (newAction: ActionRowType) => {
+          return type === ActionType.IMAGE || type === ActionType.TEXT
+            ? feedItem.create(trx, {
+                type,
+                actionId: newAction.id,
+                text: req.body.text,
+                userId: req.user.id,
+              })
+            : null;
+        };
+
+        const actionTmp = await action.create(trx, {
           userId: req.user.id,
-          imagePath: imageData ?? null,
-          text: text ?? null,
+          text: getTextComponent(req.body),
           actionTypeCode: type,
         });
 
-        // Generates a feeditem, if action type should result in one.
-        const generateFeedItem = (newAction: ActionRowType) =>
-          EitherAsync(async () => {
-            if (type === ActionType.IMAGE || type === ActionType.TEXT) {
-              await feedItem.create(trx, {
-                type,
-                actionId: newAction.id,
-                text,
-                userId: req.user.id,
-                // imagePath,
-              });
-            }
-            return newAction;
-          });
+        const feedItemTmp = await generateFeedItem(actionTmp);
 
-        const result = await createAction
-          .chain(generateFeedItem)
-          .chain(() => fastify.throttle.markActionDone(req.user.uuid, type))
-          .map(() => ({ success: true }))
-          .mapLeft(err => {
-            req.log.error(`Error creating action: ${err}`);
-            throw fastify.httpErrors.internalServerError();
-          });
+        if (feedItemTmp != null && req.body.type === 'IMAGE') {
+          uploadImage(req.body.imageData, feedItemTmp.uuid);
+        }
 
-        return res.status(200).send(result.extract());
+        fastify.throttle.markActionDone(req.user.uuid, type);
+
+        return res.status(200).send({ success: true });
       });
     },
   );

@@ -47,18 +47,15 @@ const verifyUser = (
     throw instance.httpErrors.unauthorized();
   }
 
-  await instance.sql.user.findById(instance.db, userUuid).caseOf({
-    Right: user => {
-      req.user = user;
-    },
-    Left: err => {
+  req.user = await instance.sql.user
+    .findById(instance.db, userUuid)
+    .catch(err => {
       if (err instanceof NotFoundError) {
         throw instance.httpErrors.unauthorized();
       }
 
       throw instance.httpErrors.internalServerError();
-    },
-  });
+    });
 };
 
 const mergeOpts = (

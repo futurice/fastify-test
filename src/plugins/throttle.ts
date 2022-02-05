@@ -51,19 +51,17 @@ export const markActionDone = async (
 ): Promise<MarkActionTypeType> => {
   const { actionType } = instance.sql;
 
-  const actionTypeCooldowns = (
-    await actionType
-      .findAllUserActions(instance.db)
-      .map(actionTypes =>
-        actionTypes.reduce((acc, actionType) => {
-          acc[actionType.code as ActionType] = actionType.cooldown;
-          return acc;
-        }, {} as CooldownCache),
-      )
-      .mapLeft(err => {
-        throw new Error(`Failed to load action types in-memory: ${err}`);
-      })
-  ).extract();
+  const actionTypeCooldowns = await actionType
+    .findAllUserActions(instance.db)
+    .then(actionTypes =>
+      actionTypes.reduce((acc, actionType) => {
+        acc[actionType.code as ActionType] = actionType.cooldown;
+        return acc;
+      }, {} as CooldownCache),
+    )
+    .catch(err => {
+      throw new Error(`Failed to load action types in-memory: ${err}`);
+    });
 
   return (uuid, action) => {
     const redisQuery = instance.redis.set(

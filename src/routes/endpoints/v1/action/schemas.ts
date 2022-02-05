@@ -1,4 +1,11 @@
-import { Codec, string, boolean, enumeration, optional } from 'purify-ts/Codec';
+import {
+  Codec,
+  string,
+  boolean,
+  optional,
+  exactly,
+  oneOf,
+} from 'purify-ts/Codec';
 
 export enum ActionType {
   IMAGE = 'IMAGE',
@@ -6,11 +13,26 @@ export enum ActionType {
   SIMA = 'SIMA',
 }
 
-export const createActionDTO = Codec.interface({
-  imageData: optional(string),
-  text: optional(string),
-  type: enumeration(ActionType),
+export const createSimaActionDTO = Codec.interface({
+  type: exactly(ActionType.SIMA),
 });
+
+export const createImageActionDTO = Codec.interface({
+  imageData: string,
+  text: optional(string),
+  type: exactly(ActionType.IMAGE),
+});
+
+export const createTextActionDTO = Codec.interface({
+  text: string,
+  type: exactly(ActionType.TEXT),
+});
+
+export const createActionDTO = oneOf([
+  createSimaActionDTO,
+  createImageActionDTO,
+  createTextActionDTO,
+]);
 
 export const createActionResponse = Codec.interface({
   success: boolean,

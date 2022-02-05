@@ -1,5 +1,5 @@
 import { sql } from 'slonik';
-import { DateTime, SnakeToCamel, query, Transaction } from './utils';
+import { DateTime, SnakeToCamel, Transaction } from './utils';
 
 class ActionTypeRow {
   id: number;
@@ -16,10 +16,9 @@ export type ActionTypeType = {
   [K in keyof ActionTypeRow as SnakeToCamel<K>]: ActionTypeRow[K];
 };
 
-export const findAllUserActions = query((trx: Transaction) =>
+export const findAllUserActions = (trx: Transaction) =>
   trx.any(sql<ActionTypeType>`
     SELECT *
     FROM action_type
     WHERE is_user_action IS TRUE;
-  `),
-);
+  `);
