@@ -51,7 +51,7 @@ export const markActionDone = async (
 ): Promise<MarkActionTypeType> => {
   const { actionType } = instance.sql;
 
-  const cache = await actionType
+  const actionTypeCooldowns = await actionType
     .findAllUserActions(instance.db)
     .map(actionTypes =>
       actionTypes.reduce((acc, actionType) => {
@@ -71,14 +71,14 @@ export const markActionDone = async (
       key(uuid, action),
       '', // Actual value does not matter
       'PX', // MS
-      cache[action],
+      actionTypeCooldowns[action],
     );
     return EitherAsync(() => redisQuery).map(result => result === 'OK');
   };
 };
 
 const plugin: FastifyPluginAsync = async instance => {
-  const throttle = {
+  const throttle: ThrottlePlugin = {
     markActionDone: await markActionDone(instance),
     canDoAction: canDoAction(instance),
   };
@@ -86,12 +86,14 @@ const plugin: FastifyPluginAsync = async instance => {
   instance.decorate('throttle', throttle);
 };
 
+type ThrottlePlugin = {
+  markActionDone: MarkActionTypeType;
+  canDoAction: ReturnType<typeof canDoAction>;
+};
+
 declare module 'fastify' {
   interface FastifyInstance {
-    throttle: {
-      markActionDone: MarkActionTypeType;
-      canDoAction: ReturnType<typeof canDoAction>;
-    };
+    throttle: ThrottlePlugin;
   }
 }
 

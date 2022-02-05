@@ -1,4 +1,8 @@
-import { DatabaseTransactionConnectionType, sql } from 'slonik';
+import {
+  DatabaseTransactionConnectionType,
+  DatabasePoolConnectionType,
+  sql,
+} from 'slonik';
 import { EitherAsync } from 'purify-ts';
 
 export type DateTime = Date;
@@ -22,9 +26,20 @@ export const camelToSnakeCase = (str: string) =>
 
 export type Transaction = DatabaseTransactionConnectionType;
 
-export function buildQuery<I, O>(
-  action: (trx: Transaction, i: I) => Promise<Readonly<O>>,
-) {
-  return (trx: Transaction, parameters: I) =>
-    EitherAsync<unknown, Readonly<O>>(() => action(trx, parameters));
-}
+export type DatabaseConnection =
+  | DatabasePoolConnectionType
+  | DatabaseTransactionConnectionType;
+
+type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
+type Query = (...args: any) => any;
+type QueryBuilder = <TQuery extends Query>(
+  query: TQuery,
+) => (
+  ...args: Parameters<TQuery>
+) => EitherAsync<unknown, Awaited<ReturnType<TQuery>>>;
+
+export const query: QueryBuilder = dbQuery => {
+  return (...args) => {
+    return EitherAsync(() => dbQuery(...((args as unknown) as any)));
+  };
+};

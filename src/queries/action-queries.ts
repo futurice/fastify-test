@@ -1,5 +1,5 @@
 import { sql } from 'slonik';
-import { DateTime, SnakeToCamel, Transaction, buildQuery } from './utils';
+import { DateTime, SnakeToCamel, Transaction, query } from './utils';
 
 class ActionRow {
   id: number;
@@ -24,7 +24,7 @@ export type CreateActionInput = {
   text: string | null;
 };
 
-export const create = buildQuery(
+export const create = query(
   (
     trx: Transaction,
     { userId, actionTypeCode, imagePath, text }: CreateActionInput,

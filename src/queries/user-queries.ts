@@ -1,5 +1,6 @@
 import { sql } from 'slonik';
-import { SnakeToCamel } from './utils';
+import { SnakeToCamel, Transaction } from './utils';
+import { query } from './utils';
 
 class UserRow {
   id: number;
@@ -13,8 +14,10 @@ export type UserType = {
   [K in keyof UserRow as SnakeToCamel<K>]: UserRow[K];
 };
 
-export const findById = (uuid: string) => sql<UserType>`
-  SELECT *
-  FROM users
-  WHERE uuid=${uuid}
-`;
+export const findById = query((trx: Transaction, uuid: string) =>
+  trx.one(sql<UserType>`
+    SELECT *
+    FROM users
+    WHERE uuid=${uuid}
+`),
+);
