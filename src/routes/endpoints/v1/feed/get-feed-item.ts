@@ -21,14 +21,15 @@ const routes: FastifyPluginAsync = async fastify => {
     async (req, res) => {
       const { feedItem } = fastify.sql;
 
-      await feedItem
+      const result = await feedItem
         .findOne(fastify.db, req.params.feedItemUuid)
-        .ifRight(response => res.status(200).send(response))
-        .ifLeft(err => {
+        .map(response => res.status(200).send(response))
+        .mapLeft(err => {
           req.log.error(`Error getting feed item: ${err}`);
-          return res.internalServerError();
-        })
-        .run();
+          throw fastify.httpErrors.internalServerError();
+        });
+
+      return result.extract();
     },
   );
 };

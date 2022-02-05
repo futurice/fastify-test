@@ -29,21 +29,21 @@ const routes: FastifyPluginAsync = async fastify => {
       const { feedItemUuid } = req.params;
       const { comment } = fastify.sql;
 
-      await comment
+      const result = await comment
         .create(fastify.db, {
           feedItemUuid,
           userId: req.user.id,
           ...req.body,
         })
-        .ifRight(result => res.status(200).send(result))
-        .ifLeft(err => {
+        .mapLeft(err => {
           if (!(err instanceof ForeignKeyIntegrityConstraintViolationError)) {
-            return res.notFound('Feed item does not exist');
+            throw fastify.httpErrors.notFound('Feed item does not exist');
           }
 
-          return res.internalServerError();
-        })
-        .run();
+          throw fastify.httpErrors.internalServerError();
+        });
+
+      return res.status(200).send(result.extract());
     },
   );
 };

@@ -24,19 +24,18 @@ const routes: FastifyPluginAsync = async fastify => {
     }),
     async (req, res) => {
       const { user } = fastify.sql;
-      await user
-        .create(fastify.db, req.body)
-        .ifRight(result => res.send(result))
-        .mapLeft(err => {
-          if (err instanceof ForeignKeyIntegrityConstraintViolationError) {
-            return res.notFound('No such team');
-          }
+      const result = await user.create(fastify.db, req.body).mapLeft(err => {
+        if (err instanceof ForeignKeyIntegrityConstraintViolationError) {
+          throw fastify.httpErrors.notFound('No such team');
+        }
 
-          if (err instanceof UniqueIntegrityConstraintViolationError) {
-            return res.badRequest('Username reserved');
-          }
-          return res.internalServerError();
-        });
+        if (err instanceof UniqueIntegrityConstraintViolationError) {
+          throw fastify.httpErrors.badRequest('Username reserved');
+        }
+        throw fastify.httpErrors.internalServerError();
+      });
+
+      return res.status(200).send(result.extract());
     },
   );
 };
