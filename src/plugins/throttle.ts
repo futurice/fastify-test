@@ -4,7 +4,6 @@ import {
   FastifyPluginAsync,
 } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
-import { EitherAsync } from 'purify-ts';
 import {
   ActionType,
   createActionDTO,
@@ -25,26 +24,24 @@ export const canDoAction: (
     })
     .extract();
 
-  const redisQuery = instance.redis.exists(key(req.user.uuid, body.type));
-  return EitherAsync(() => redisQuery)
-    .map(result => result === 1)
-    .caseOf({
-      Right: exists => {
-        if (exists) {
-          throw instance.httpErrors.forbidden('Cooldown active');
-        }
-      },
-      Left: err => {
-        instance.log.error(`Error checing action validity ${err}`);
-        throw instance.httpErrors.internalServerError();
-      },
+  const result = await instance.redis
+    .exists(key(req.user.uuid, body.type))
+    .catch(err => {
+      instance.log.error(`Error checing action validity ${err}`);
+      throw instance.httpErrors.internalServerError();
     });
+
+  if (result === 1) {
+    throw instance.httpErrors.forbidden('Cooldown active');
+  }
+
+  return true;
 };
 
 type MarkActionTypeType = (
   uuid: string,
   action: ActionType,
-) => EitherAsync<unknown, boolean>;
+) => Promise<boolean>;
 
 export const markActionDone = async (
   instance: FastifyInstance,
@@ -63,14 +60,15 @@ export const markActionDone = async (
       throw new Error(`Failed to load action types in-memory: ${err}`);
     });
 
-  return (uuid, action) => {
-    const redisQuery = instance.redis.set(
+  return async (uuid, action) => {
+    const result = await instance.redis.set(
       key(uuid, action),
       '', // Actual value does not matter
       'PX', // MS
       actionTypeCooldowns[action],
     );
-    return EitherAsync(() => redisQuery).map(result => result === 'OK');
+
+    return result === 'OK';
   };
 };
 

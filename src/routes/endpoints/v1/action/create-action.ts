@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from 'fastify';
-import { Maybe, Nothing, Either } from 'purify-ts';
 import { GetType } from 'purify-ts/Codec';
 import { ActionType as ActionRowType } from '../../../../queries/action-queries';
 import { createActionDTO, createActionResponse, ActionType } from './schemas';
@@ -61,7 +60,7 @@ const routes: FastifyPluginAsync = async fastify => {
           uploadImage(req.body.imageData, feedItemTmp.uuid);
         }
 
-        fastify.throttle.markActionDone(req.user.uuid, type);
+        await fastify.throttle.markActionDone(req.user.uuid, type);
 
         return res.status(200).send({ success: true });
       });
