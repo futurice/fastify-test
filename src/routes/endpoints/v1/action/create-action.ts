@@ -23,7 +23,7 @@ const routes: FastifyPluginAsync = async fastify => {
     }),
     (req, res) => {
       return fastify.db.transaction(async trx => {
-        const { action, feedItem } = fastify.sql;
+        const { action: actionQuery, feedItem: feedItemQuery } = fastify.sql;
         const { type } = req.body;
 
         const getTextComponent = (action: GetType<typeof createActionDTO>) => {
@@ -37,9 +37,9 @@ const routes: FastifyPluginAsync = async fastify => {
         };
 
         // Generates a feeditem, if action type should result in one.
-        const generateFeedItem = (newAction: ActionRowType) => {
+        const createFeedItem = (newAction: ActionRowType) => {
           return type === ActionType.IMAGE || type === ActionType.TEXT
-            ? feedItem.create(trx, {
+            ? feedItemQuery.create(trx, {
                 type,
                 actionId: newAction.id,
                 text: req.body.text,
@@ -48,16 +48,16 @@ const routes: FastifyPluginAsync = async fastify => {
             : null;
         };
 
-        const actionTmp = await action.create(trx, {
+        const action = await actionQuery.create(trx, {
           userId: req.user.id,
           text: getTextComponent(req.body),
           actionTypeCode: type,
         });
 
-        const feedItemTmp = await generateFeedItem(actionTmp);
+        const feedItem = await createFeedItem(action);
 
-        if (feedItemTmp != null && req.body.type === 'IMAGE') {
-          uploadImage(req.body.imageData, feedItemTmp.uuid);
+        if (feedItem != null && req.body.type === 'IMAGE') {
+          uploadImage(req.body.imageData, feedItem.uuid);
         }
 
         await fastify.throttle.markActionDone(req.user.uuid, type);
