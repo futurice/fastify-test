@@ -21,3 +21,16 @@ export const findById = query((trx: Transaction, uuid: string) =>
     WHERE uuid=${uuid}
 `),
 );
+
+type UserDTO = {
+  name: string;
+  teamId: number;
+};
+
+export const create = query((trx: Transaction, { name, teamId }: UserDTO) => {
+  return trx.one(sql<UserType>`
+    INSERT INTO users(name, team_id)
+    VALUES (${name}, ${teamId})
+    RETURNING *;
+  `);
+});

@@ -30,8 +30,8 @@ export const create = query(
     { userId, actionTypeCode, imagePath, text }: CreateActionInput,
   ) =>
     trx.one(sql<ActionType>`
-  INSERT INTO action("user_id", "action_type_id", "image_path", "text")
-  VALUES (${userId}, (SELECT id FROM action_type WHERE code = ${actionTypeCode}), ${imagePath}, ${text})
-  RETURNING *;
-`),
+      INSERT INTO action("user_id", "action_type_id", "image_path", "text")
+      VALUES (${userId}, (SELECT id FROM action_type WHERE code = ${actionTypeCode}), ${imagePath}, ${text})
+      RETURNING *;
+    `),
 );

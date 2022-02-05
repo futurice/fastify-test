@@ -16,7 +16,7 @@ CREATE TABLE "guild" (
 CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "uuid" uuid DEFAULT uuid_generate_v4 (),
-    "name" TEXT NOT NULL,
+    "name" TEXT NOT NULL UNIQUE,
     "team_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -73,6 +73,7 @@ CREATE TABLE "comment" (
     "user_id" INTEGER NOT NULL,
     "feed_item_id" INTEGER NOT NULL,
     "text" TEXT NOT NULL,
+    "uuid" uuid NOT NULL DEFAULT uuid_generate_v4 (),
     "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

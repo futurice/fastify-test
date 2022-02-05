@@ -54,18 +54,13 @@ const routes: FastifyPluginAsync = async fastify => {
             fastify.throttle.markActionDone(req.user.uuid, type),
           );
 
-        return await createAction
+        await createAction
           .chain(generateFeedItem)
           .chain(markDone)
-          .caseOf({
-            Left: err => {
-              req.log.error(`Error creating action: ${err}`);
-              throw fastify.httpErrors.internalServerError();
-            },
-            Right: () =>
-              res.status(200).send({
-                success: true,
-              }),
+          .ifRight(() => res.status(200).send({ success: true }))
+          .ifLeft(err => {
+            req.log.error(`Error creating action: ${err}`);
+            return res.internalServerError();
           });
       });
     },

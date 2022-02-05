@@ -1,4 +1,4 @@
-import { Codec } from 'purify-ts';
+import { Codec, string } from 'purify-ts';
 
 export const optionalWithDefault = <T>(codec: Codec<T>, defaultValue: T) => ({
   _isOptional: true,
@@ -11,3 +11,19 @@ export const optionalWithDefault = <T>(codec: Codec<T>, defaultValue: T) => ({
     }),
   }),
 });
+
+export const regexStr = (regex: RegExp) =>
+  Codec.custom<string>({
+    decode: string.decode,
+    encode: string.encode,
+    schema: () => {
+      return {
+        ...string.schema(),
+        pattern: regex.source,
+      };
+    },
+  });
+
+export const uuid = regexStr(
+  /^[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[4][0-9a-zA-Z]{3}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}$/,
+);

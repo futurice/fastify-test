@@ -17,13 +17,13 @@ type CommentType = {
   [K in keyof CommentRow as SnakeToCamel<K>]: CommentRow[K];
 };
 
-type CreateCommentInput = {
+type CommentDTO = {
   userId: number;
   feedItemUuid: string;
   text: string;
 };
 
-export const create = query((trx: Transaction, input: CreateCommentInput) => {
+export const create = query((trx: Transaction, input: CommentDTO) => {
   const { userId, text, feedItemUuid } = input;
   return trx.one(sql<CommentType>`
     INSERT INTO comment(user_id, text, feed_item_id)
