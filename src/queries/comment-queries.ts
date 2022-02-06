@@ -1,5 +1,5 @@
 import { sql } from 'slonik';
-import { DateTime, SnakeToCamel, Transaction, buildQuery } from './utils';
+import { DateTime, SnakeToCamel, Transaction } from './utils';
 
 export type FeedItemTypes = 'IMAGE' | 'TEXT';
 
@@ -17,19 +17,17 @@ type CommentType = {
   [K in keyof CommentRow as SnakeToCamel<K>]: CommentRow[K];
 };
 
-type CreateCommentInput = {
+type CommentDTO = {
   userId: number;
   feedItemUuid: string;
   text: string;
 };
 
-export const create = buildQuery(
-  (trx: Transaction, input: CreateCommentInput) => {
-    const { userId, text, feedItemUuid } = input;
-    return trx.one(sql<CommentType>`
+export const create = (trx: Transaction, input: CommentDTO) => {
+  const { userId, text, feedItemUuid } = input;
+  return trx.one(sql<CommentType>`
     INSERT INTO comment(user_id, text, feed_item_id)
     VALUES (${userId}, ${text}, (SELECT id FROM feed_item WHERE uuid = ${feedItemUuid}))
     RETURNING *;
   `);
-  },
-);
+};

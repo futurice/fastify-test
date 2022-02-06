@@ -1,10 +1,10 @@
 import { FastifyPluginAsync } from 'fastify';
 import { GetType } from 'purify-ts/Codec';
-import { ActionTypeResponse } from './schemas';
+import { actionTypeResponse } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
   fastify.get<{
-    Reply: GetType<typeof ActionTypeResponse>;
+    Reply: GetType<typeof actionTypeResponse>;
   }>(
     '/',
     fastify.secureRoute.authenticated({
@@ -12,19 +12,20 @@ const routes: FastifyPluginAsync = async fastify => {
         description: 'Lists supported action types',
         tags: ['action-type'],
         response: {
-          200: ActionTypeResponse.schema(),
+          200: actionTypeResponse.schema(),
         },
       },
     }),
     async (req, res) => {
       const { actionType } = fastify.sql;
-      return actionType.findAllUserActions(fastify.db).caseOf({
-        Left: err => {
+      const result = await actionType
+        .findAllUserActions(fastify.db)
+        .catch(err => {
           req.log.error(`Error getting action types: ${err}`);
           throw fastify.httpErrors.internalServerError();
-        },
-        Right: result => res.status(200).send(result.slice()),
-      });
+        });
+
+      return res.status(200).send(result.slice());
     },
   );
 };

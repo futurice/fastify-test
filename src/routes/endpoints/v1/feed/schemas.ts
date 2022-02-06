@@ -9,11 +9,10 @@ import {
 } from 'purify-ts/Codec';
 import {
   NumberRangedIn,
-  NonEmptyString,
   StringLengthRangedIn,
   Integer,
 } from 'purify-ts-extra-codec';
-import { optionalWithDefault } from '../../../../utils/codec';
+import { optionalWithDefault, uuid } from '../../../../utils/codec';
 
 export enum FeedSort {
   New = 'NEW',
@@ -26,7 +25,7 @@ const author = Codec.interface({
 
 export const FeedResponse = array(
   Codec.interface({
-    uuid: string,
+    uuid: uuid,
     type: string,
     text: nullable(string),
     image: nullable(string),
@@ -38,29 +37,29 @@ export const FeedResponse = array(
   }),
 );
 
-export const FeedQuery = Codec.interface({
+export const feedQuery = Codec.interface({
   limit: optionalWithDefault(NumberRangedIn({ gte: 1, lte: 100 }), 50),
   orderBy: optionalWithDefault(enumeration(FeedSort), FeedSort.Hot),
 });
 
-export const CreateCommentParams = Codec.interface({
-  feedItemUuid: NonEmptyString,
+export const createCommentParams = Codec.interface({
+  feedItemUuid: uuid,
 });
 
-export const CreateCommentInput = Codec.interface({
+export const createCommentDTO = Codec.interface({
   text: StringLengthRangedIn({ gt: 0, lte: 1000 }),
 });
 
-export const CreateCommentResponse = Codec.interface({
-  uuid: NonEmptyString,
+export const createCommentResponse = Codec.interface({
+  uuid: uuid,
 });
 
-export const GetFeedItemParams = Codec.interface({
-  feedItemUuid: NonEmptyString,
+export const getFeedItemParams = Codec.interface({
+  feedItemUuid: uuid,
 });
 
-export const FeedOneResponse = Codec.interface({
-  uuid: string,
+export const feedOneResponse = Codec.interface({
+  uuid: uuid,
   type: string,
   text: nullable(string),
   image: nullable(string),
@@ -69,7 +68,7 @@ export const FeedOneResponse = Codec.interface({
   author: nullable(author),
   comments: array(
     Codec.interface({
-      uuid: string,
+      uuid: uuid,
       text: string,
       createdAt: string,
       author: author,

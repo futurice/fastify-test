@@ -47,8 +47,8 @@ const verifyUser = (
     throw instance.httpErrors.unauthorized();
   }
 
-  const user = await instance.db
-    .one(instance.sql.user.findById(userUuid))
+  req.user = await instance.sql.user
+    .findById(instance.db, userUuid)
     .catch(err => {
       if (err instanceof NotFoundError) {
         throw instance.httpErrors.unauthorized();
@@ -56,8 +56,6 @@ const verifyUser = (
 
       throw instance.httpErrors.internalServerError();
     });
-
-  req.user = user;
 };
 
 const mergeOpts = (
@@ -93,7 +91,7 @@ const authPlugin: FastifyPluginAsync<ITokenPluginOpts> = fastifyPlugin(
   async (instance, pluginOpts) => {
     const { token } = pluginOpts;
     await instance.register(fastifyAuth);
-    instance.decorateRequest('user', {});
+    instance.decorateRequest('user', null);
 
     const secureRoute: FastifyInstance['secureRoute'] = {
       authenticated: (opts: RouteShorthandOptions) =>

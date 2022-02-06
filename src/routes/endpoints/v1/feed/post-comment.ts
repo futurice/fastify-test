@@ -2,26 +2,26 @@ import { FastifyPluginAsync } from 'fastify';
 import { GetType } from 'purify-ts/Codec';
 import { ForeignKeyIntegrityConstraintViolationError } from 'slonik';
 import {
-  CreateCommentResponse,
-  CreateCommentInput,
-  CreateCommentParams,
+  createCommentResponse,
+  createCommentDTO,
+  createCommentParams,
 } from './schemas';
 
 const routes: FastifyPluginAsync = async fastify => {
   fastify.post<{
-    Reply: GetType<typeof CreateCommentResponse>;
-    Params: GetType<typeof CreateCommentParams>;
-    Body: GetType<typeof CreateCommentInput>;
+    Reply: GetType<typeof createCommentResponse>;
+    Params: GetType<typeof createCommentParams>;
+    Body: GetType<typeof createCommentDTO>;
   }>(
     '/:feedItemUuid/comment',
     fastify.secureRoute.user({
       schema: {
         description: 'Post a comment to a feed item',
         tags: ['feed'],
-        params: CreateCommentParams.schema(),
-        body: CreateCommentInput.schema(),
+        params: createCommentParams.schema(),
+        body: createCommentDTO.schema(),
         response: {
-          200: CreateCommentResponse.schema(),
+          200: createCommentResponse.schema(),
         },
       },
     }),
@@ -29,22 +29,21 @@ const routes: FastifyPluginAsync = async fastify => {
       const { feedItemUuid } = req.params;
       const { comment } = fastify.sql;
 
-      return await comment
+      const result = await comment
         .create(fastify.db, {
           feedItemUuid,
           userId: req.user.id,
           ...req.body,
         })
-        .caseOf({
-          Right: result => res.status(200).send(result),
-          Left: err => {
-            if (!(err instanceof ForeignKeyIntegrityConstraintViolationError)) {
-              throw fastify.httpErrors.notFound('Feed item does not exist');
-            }
+        .catch(err => {
+          if (!(err instanceof ForeignKeyIntegrityConstraintViolationError)) {
+            throw fastify.httpErrors.notFound('Feed item does not exist');
+          }
 
-            throw fastify.httpErrors.internalServerError();
-          },
+          throw fastify.httpErrors.internalServerError();
         });
+
+      return res.status(200).send(result);
     },
   );
 };

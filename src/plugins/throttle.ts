@@ -4,10 +4,9 @@ import {
   FastifyPluginAsync,
 } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
-import { EitherAsync } from 'purify-ts';
 import {
   ActionType,
-  CreateActionInput,
+  createActionDTO,
 } from '../routes/endpoints/v1/action/schemas';
 
 const key = (uuid: string, action: ActionType) => `${uuid}:${action}`;
@@ -17,68 +16,64 @@ type CooldownCache = Record<ActionType, number>;
 export const canDoAction: (
   instance: FastifyInstance,
 ) => preHandlerAsyncHookHandler = instance => async req => {
-  const body = CreateActionInput.decode(req.body).caseOf({
-    Right: result => result,
-    Left: err => {
+  const body = createActionDTO
+    .decode(req.body)
+    .mapLeft(err => {
       instance.log.error(`Unexpected canDoAction input: ${err}`);
       throw instance.httpErrors.internalServerError();
-    },
-  });
+    })
+    .extract();
 
-  const redisQuery = instance.redis.exists(key(req.user.uuid, body.type));
-  return await EitherAsync(() => redisQuery)
-    .map(result => result === 1)
-    .caseOf({
-      Right: exists => {
-        if (exists) {
-          throw instance.httpErrors.unauthorized();
-        }
-      },
-      Left: err => {
-        instance.log.error(`Error checing action validity ${err}`);
-        throw instance.httpErrors.internalServerError();
-      },
+  const result = await instance.redis
+    .exists(key(req.user.uuid, body.type))
+    .catch(err => {
+      instance.log.error(`Error checing action validity ${err}`);
+      throw instance.httpErrors.internalServerError();
     });
+
+  if (result === 1) {
+    throw instance.httpErrors.forbidden('Cooldown active');
+  }
+
+  return true;
 };
 
 type MarkActionTypeType = (
   uuid: string,
   action: ActionType,
-) => EitherAsync<unknown, boolean>;
+) => Promise<boolean>;
 
 export const markActionDone = async (
   instance: FastifyInstance,
 ): Promise<MarkActionTypeType> => {
   const { actionType } = instance.sql;
 
-  const cache = await actionType
+  const actionTypeCooldowns = await actionType
     .findAllUserActions(instance.db)
-    .map(actionTypes =>
+    .then(actionTypes =>
       actionTypes.reduce((acc, actionType) => {
         acc[actionType.code as ActionType] = actionType.cooldown;
         return acc;
       }, {} as CooldownCache),
     )
-    .caseOf({
-      Right: result => result,
-      Left: err => {
-        throw new Error(`Failed to load action types in-memory: ${err}`);
-      },
+    .catch(err => {
+      throw new Error(`Failed to load action types in-memory: ${err}`);
     });
 
-  return (uuid, action) => {
-    const redisQuery = instance.redis.set(
+  return async (uuid, action) => {
+    const result = await instance.redis.set(
       key(uuid, action),
       '', // Actual value does not matter
       'PX', // MS
-      cache[action],
+      actionTypeCooldowns[action],
     );
-    return EitherAsync(() => redisQuery).map(result => result === 'OK');
+
+    return result === 'OK';
   };
 };
 
 const plugin: FastifyPluginAsync = async instance => {
-  const throttle = {
+  const throttle: ThrottlePlugin = {
     markActionDone: await markActionDone(instance),
     canDoAction: canDoAction(instance),
   };
@@ -86,12 +81,14 @@ const plugin: FastifyPluginAsync = async instance => {
   instance.decorate('throttle', throttle);
 };
 
+type ThrottlePlugin = {
+  markActionDone: MarkActionTypeType;
+  canDoAction: ReturnType<typeof canDoAction>;
+};
+
 declare module 'fastify' {
   interface FastifyInstance {
-    throttle: {
-      markActionDone: MarkActionTypeType;
-      canDoAction: ReturnType<typeof canDoAction>;
-    };
+    throttle: ThrottlePlugin;
   }
 }
 

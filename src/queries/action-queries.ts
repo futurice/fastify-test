@@ -1,11 +1,10 @@
 import { sql } from 'slonik';
-import { DateTime, SnakeToCamel, Transaction, buildQuery } from './utils';
+import { DateTime, SnakeToCamel, Transaction } from './utils';
 
 class ActionRow {
   id: number;
   user_id: number;
   action_type_id: number;
-  image_path: string | null;
   text: string | null;
   aggregate: boolean;
   created_at: DateTime;
@@ -20,18 +19,15 @@ export type ActionType = {
 export type CreateActionInput = {
   userId: number;
   actionTypeCode: string;
-  imagePath: string | null;
   text: string | null;
 };
 
-export const create = buildQuery(
-  (
-    trx: Transaction,
-    { userId, actionTypeCode, imagePath, text }: CreateActionInput,
-  ) =>
-    trx.one(sql<ActionType>`
-  INSERT INTO action("user_id", "action_type_id", "image_path", "text")
-  VALUES (${userId}, (SELECT id FROM action_type WHERE code = ${actionTypeCode}), ${imagePath}, ${text})
-  RETURNING *;
-`),
-);
+export const create = (
+  trx: Transaction,
+  { userId, actionTypeCode, text }: CreateActionInput,
+) =>
+  trx.one(sql<ActionType>`
+      INSERT INTO action("user_id", "action_type_id", "text")
+      VALUES (${userId}, (SELECT id FROM action_type WHERE code = ${actionTypeCode}), ${text})
+      RETURNING *;
+    `);

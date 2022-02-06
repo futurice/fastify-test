@@ -1,6 +1,6 @@
 import { Codec, string, array, number } from 'purify-ts/Codec';
 
-export const ActionTypeResponse = array(
+export const actionTypeResponse = array(
   Codec.interface({
     code: string,
     name: string,
